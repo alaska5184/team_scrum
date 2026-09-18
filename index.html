@@ -184,6 +184,27 @@ main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:1152px;marg
 .progNum{font-size:10.5px;color:var(--text-muted);font-family:var(--font-mono);flex:none;}
 .item a.outlink{font-size:11px;color:var(--info);text-decoration:none;font-weight:700;}
 .item a.outlink:hover{text-decoration:underline;}
+.item .taskLine .cat{font-size:10px;color:var(--text-muted);border:1px solid var(--border);border-radius:5px;padding:0 6px;}
+.item .taskLine .ticketNo{font-size:10px;color:var(--text-faint);font-family:var(--font-mono);}
+.item .subChecklist{margin-top:6px;display:flex;flex-direction:column;gap:5px;}
+.item .subChecklist .subRow{display:flex;align-items:center;gap:8px;}
+.item .subChecklist .subRow .subTitle{flex:1;font-size:12px;color:var(--text-muted);line-height:1.5;}
+.item .subChecklist .subRow .progBar{width:56px;}
+.reviewList{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);display:flex;flex-direction:column;gap:6px;}
+.reviewRow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11.5px;}
+.reviewRow .rTag{background:var(--warning-soft);color:var(--warning);font-weight:800;border-radius:4px;padding:1px 6px;flex:none;}
+.reviewRow .rText{color:var(--text-muted);}
+.reviewRow .rTo{color:var(--accent-strong);font-weight:700;}
+.reviewRow .rDate{color:var(--text-faint);font-family:var(--font-mono);margin-left:auto;}
+.loadYesterdayBtn{width:100%;padding:9px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--text-muted);font-weight:700;font-size:12px;margin-bottom:14px;}
+.loadYesterdayBtn:hover{color:var(--accent-strong);border-color:var(--accent);}
+.sectionLabel{font-size:12.5px;font-weight:800;color:var(--text-muted);margin:16px 2px 8px;}
+.reviewEditRow{display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:6px;margin-bottom:8px;align-items:center;}
+.reviewEditRow input,.reviewEditRow select{padding:7px 8px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--surface-2);font-size:12px;width:100%;}
+.reviewEditRow button{border:none;background:none;color:var(--text-faint);font-size:13px;padding:2px 4px;}
+.reviewEditRow button:hover{color:var(--danger);}
+.addReviewBtn{width:100%;padding:9px;border:1px dashed var(--border-strong);border-radius:var(--r-md);background:none;color:var(--accent-strong);font-weight:700;font-size:12px;margin-top:2px;}
+@media (max-width:460px){.reviewEditRow{grid-template-columns:1fr 1fr;}}
 
 /* ---------- task table ---------- */
 .taskToolbar{display:flex;align-items:center;gap:10px;padding:14px 16px;flex-wrap:wrap;}
@@ -796,15 +817,24 @@ function renderScrum(){
     const itemsHtml=(entry.items||[]).map(it=>{
       const t=taskById(it.taskId);
       const prio=it.priority?('<span class="prio '+it.priority+'">'+({p1:'우선순위 1',p2:'우선순위 2',p3:'우선순위 3'}[it.priority]||'')+'</span>'):'';
-      return '<div class="item"><div class="taskLine">'+(t?'<span class="code">'+esc(t.code)+'</span>'+esc(t.title):'<span>기타</span>')+prio+'</div>'
+      const cat=t&&t.category?'<span class="cat">'+esc(t.category)+'</span>':'';
+      const ticketNo=t&&t.ticket?'<span class="ticketNo">'+esc(t.ticket)+'</span>':'';
+      const subs=t&&t.subtasks&&t.subtasks.length?t.subtasks:null;
+      const subsHtml=subs?('<div class="subChecklist">'+subs.map(s=>'<div class="subRow"><span class="subTitle">'+esc(s.title||'')+'</span><div class="progBar"><i style="width:'+clamp(s.progress||0,0,100)+'%"></i></div><span class="progNum">'+(s.progress||0)+'%</span></div>').join('')+'</div>'):'';
+      return '<div class="item"><div class="taskLine">'+(t?'<span class="code">'+esc(t.code)+'</span>'+esc(t.title):'<span>기타</span>')+cat+ticketNo+prio+'</div>'
         +(it.note?'<div class="note">'+esc(it.note)+'</div>':'')
-        +'<div class="metaRow"><div class="progBar"><i style="width:'+clamp(it.progress||0,0,100)+'%"></i></div><span class="progNum">'+(it.progress||0)+'%</span></div>'
+        +(subsHtml||'<div class="metaRow"><div class="progBar"><i style="width:'+clamp(it.progress||0,0,100)+'%"></i></div><span class="progNum">'+(it.progress||0)+'%</span></div>')
         +(it.link?'<div style="margin-top:5px;"><a class="outlink" target="_blank" rel="noopener" href="'+esc(it.link)+'">산출물 링크 ↗</a></div>':'')
         +'</div>';
     }).join('') || '<div class="note">작성된 항목이 없습니다.</div>';
+    const reviewHtml=(entry.reviewRequests&&entry.reviewRequests.length)?('<div class="reviewList">'+entry.reviewRequests.map(r=>{
+      const rm=memberById(r.mentionId);
+      const dLabel=r.date?(Number(r.date.slice(5,7))+'.'+Number(r.date.slice(8,10))):'';
+      return '<div class="reviewRow"><span class="rTag">리뷰 대기</span><span class="rText">'+esc(r.text||'')+'</span>'+(rm?'<span class="rTo">→ @'+esc(rm.name)+'</span>':'')+(dLabel?'<span class="rDate">'+dLabel+'</span>':'')+'</div>';
+    }).join('')+'</div>'):'';
     const canEdit=S.me && (S.me.id===m.id || isAdmin());
     return '<div class="card"><div class="cHead"><span class="avatar" style="background:'+colorFor(m.id)+'">'+initials(m.name)+'</span><b>'+esc(m.name)+'</b><span class="role">'+esc(m.team||'')+'</span>'
-      +(canEdit?'<button class="more" data-more="'+m.id+'" title="더보기">⋯</button>':'')+'</div>'+itemsHtml+'</div>';
+      +(canEdit?'<button class="more" data-more="'+m.id+'" title="더보기">⋯</button>':'')+'</div>'+itemsHtml+reviewHtml+'</div>';
   }).join('') : '<div class="scrumEmpty">해당 카드가 없습니다.</div>';
   doneEl.querySelectorAll('[data-more]').forEach(b=>b.addEventListener('click',()=>{
     const mid=b.dataset.more; const entry=entriesByMember.get(mid);
@@ -978,6 +1008,7 @@ function openTaskDetail(id){
 function openScrumEditor(memberId,entry){
   const member=memberById(memberId);
   const items=(entry&&entry.items&&entry.items.length)?JSON.parse(JSON.stringify(entry.items)):[{taskId:'',note:'',priority:'p3',progress:0,link:''}];
+  const reviews=(entry&&entry.reviewRequests&&entry.reviewRequests.length)?JSON.parse(JSON.stringify(entry.reviewRequests)):[];
   const canEdit=S.me && (S.me.id===memberId || isAdmin());
   function itemHtml(it,idx){
     const taskOpts='<option value="">기타</option>'+S.tasks.map(t=>'<option value="'+t.id+'" '+(it.taskId===t.id?'selected':'')+'>'+esc(t.code)+' '+esc(t.title)+'</option>').join('');
@@ -990,24 +1021,54 @@ function openScrumEditor(memberId,entry){
       +'<div class="field2 full"><label>산출물 링크 (선택)</label><input data-f="link" data-idx="'+idx+'" type="url" placeholder="https://..." value="'+esc(it.link||'')+'"></div>'
       +'</div></div>';
   }
+  function reviewRowHtml(r,idx){
+    const memberOpts='<option value="">멘션할 팀원</option>'+S.members.map(mm=>'<option value="'+mm.id+'" '+(r.mentionId===mm.id?'selected':'')+'>'+esc(mm.name)+'</option>').join('');
+    return '<div class="reviewEditRow" data-ridx="'+idx+'">'
+      +'<input type="text" data-rf="text" data-ridx="'+idx+'" placeholder="예: 서비스 신청 플로우" value="'+esc(r.text||'')+'">'
+      +'<select data-rf="mentionId" data-ridx="'+idx+'">'+memberOpts+'</select>'
+      +'<input type="date" data-rf="date" data-ridx="'+idx+'" value="'+esc(r.date||'')+'">'
+      +'<button type="button" data-rrm="'+idx+'">✕</button>'
+      +'</div>';
+  }
   function render(root){
     root.querySelector('#itemsHost').innerHTML=items.map(itemHtml).join('');
+    root.querySelector('#reviewHost').innerHTML=reviews.map(reviewRowHtml).join('');
     root.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{items.splice(Number(b.dataset.rm),1);render(root);}));
-    root.querySelectorAll('[data-f]').forEach(inp=>inp.addEventListener('input',()=>{
+    root.querySelectorAll('#itemsHost [data-f]').forEach(inp=>inp.addEventListener('input',()=>{
       const idx=Number(inp.dataset.idx),f=inp.dataset.f;
       items[idx][f]= f==='progress'? clamp(Number(inp.value)||0,0,100) : inp.value;
     }));
+    root.querySelectorAll('[data-rf]').forEach(inp=>inp.addEventListener('input',()=>{
+      const idx=Number(inp.dataset.ridx),f=inp.dataset.rf;
+      reviews[idx][f]=inp.value;
+    }));
+    root.querySelectorAll('[data-rrm]').forEach(b=>b.addEventListener('click',()=>{reviews.splice(Number(b.dataset.rrm),1);render(root);}));
   }
+  const prevDateStr=fmt(addDays(parse(S.scrumDate),-1));
+  const prevEntry=S.scrum.find(s=>s.date===prevDateStr && s.memberId===memberId);
   openModal('<button class="modalClose" onclick="window.__closeModal()">✕</button>'
     +'<h3>'+esc(member.name)+'님의 스크럼</h3><p class="desc">'+kDateDow(parse(S.scrumDate))+'</p>'
-    +'<form id="scrumForm"><div id="itemsHost"></div>'
+    +'<form id="scrumForm">'
+    +(canEdit&&prevEntry?'<button type="button" class="loadYesterdayBtn" id="loadYesterday">⟲ 어제 작성한 내용 불러오기</button>':'')
+    +'<div id="itemsHost"></div>'
     +(canEdit?'<button type="button" class="addItemBtn" id="addItem">+ 항목 추가</button>':'')
+    +'<div class="sectionLabel">리뷰 요청</div>'
+    +'<div id="reviewHost"></div>'
+    +(canEdit?'<button type="button" class="addReviewBtn" id="addReview">+ 리뷰 요청 추가</button>':'')
     +(canEdit?'<div class="modalActions">'+(entry?'<button type="button" class="btnDanger" id="scrumDel">삭제</button>':'')+'<button type="button" class="btnGhost" onclick="window.__closeModal()">취소</button><button class="btnPrimary" style="width:auto;">제출</button></div>':'<div class="modalActions"><button type="button" class="btnGhost" onclick="window.__closeModal()">닫기</button></div>')
     +'</form>', root=>{
       window.__closeModal=closeModal;
       render(root);
-      if(!canEdit){ root.querySelectorAll('#itemsHost select,#itemsHost input,#itemsHost textarea').forEach(el=>el.disabled=true); }
+      if(!canEdit){ root.querySelectorAll('#itemsHost select,#itemsHost input,#itemsHost textarea,#reviewHost select,#reviewHost input,#reviewHost button').forEach(el=>el.disabled=true); }
       root.querySelector('#addItem')&&root.querySelector('#addItem').addEventListener('click',()=>{items.push({taskId:'',note:'',priority:'p3',progress:0,link:''});render(root);});
+      root.querySelector('#addReview')&&root.querySelector('#addReview').addEventListener('click',()=>{reviews.push({text:'',mentionId:'',date:S.scrumDate});render(root);});
+      root.querySelector('#loadYesterday')&&root.querySelector('#loadYesterday').addEventListener('click',()=>{
+        if(!prevEntry)return;
+        const cloned=JSON.parse(JSON.stringify(prevEntry.items||[])).map(it=>Object.assign({},it,{note:'',progress:0}));
+        items.length=0; items.push.apply(items, cloned.length?cloned:[{taskId:'',note:'',priority:'p3',progress:0,link:''}]);
+        toast('어제 작성한 항목을 불러왔습니다. 오늘 진행 내용을 다시 적어주세요.');
+        render(root);
+      });
       root.querySelector('#scrumDel')&&root.querySelector('#scrumDel').addEventListener('click',async()=>{
         if(confirm('작성한 스크럼을 삭제할까요?')){await store.scrum.remove(entry.id);toast('삭제했습니다.');closeModal();}
       });
@@ -1015,7 +1076,7 @@ function openScrumEditor(memberId,entry){
         e.preventDefault();
         if(!canEdit)return;
         const id=S.scrumDate+'_'+memberId;
-        const data={date:S.scrumDate,memberId:memberId,status:'submitted',items:items};
+        const data={date:S.scrumDate,memberId:memberId,status:'submitted',items:items,reviewRequests:reviews};
         if(entry) await store.scrum.update(id,data); else await store.scrum.add(Object.assign({id:id},data));
         toast('스크럼을 제출했습니다.'); closeModal();
       });
