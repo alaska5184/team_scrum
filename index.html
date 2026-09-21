@@ -94,14 +94,17 @@ header.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;backgr
 .tabs button{border:none;background:none;padding:7px 15px;border-radius:999px;font-size:13px;font-weight:700;color:var(--text-muted);}
 .tabs button.active{background:var(--accent);color:var(--accent-contrast);}
 .topbar .spacer{flex:1;}
+.selectWrap{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border-strong);background:var(--surface-2);border-radius:999px;padding:0 10px 0 12px;}
+.selectWrap .selectIcon{flex:none;color:var(--text-muted);}
+.selectWrap .selectPill{border:none;background:transparent;padding:7px 4px 7px 0;}
 .selectPill{border:1px solid var(--border-strong);background:var(--surface-2);border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--text);}
 .iconBtn{border:1px solid var(--border-strong);background:var(--surface-2);border-radius:var(--r-sm);padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--text);display:inline-flex;align-items:center;gap:6px;}
 .iconBtn:hover{border-color:var(--accent);color:var(--accent-strong);}
 .iconBtn.solid{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent);}
 .iconBtn.solid:hover{background:var(--accent-strong);}
-.avatarBtn{display:flex;align-items:center;gap:8px;border:1px solid var(--border-strong);background:var(--surface-2);border-radius:999px;padding:5px 12px 5px 5px;}
+.avatarBtn{display:flex;align-items:center;gap:8px;border:none;background:transparent;border-radius:8px;padding:4px 6px;}
 .avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;flex:none;}
-.avatarBtn .who{display:flex;flex-direction:column;align-items:flex-start;line-height:1.25;}
+.avatarBtn .who{display:flex;flex-direction:column;align-items:flex-end;line-height:1.25;}
 .avatarBtn .who b{font-size:12px;}
 .avatarBtn .who span{font-size:10.5px;color:var(--text-muted);}
 
@@ -310,16 +313,16 @@ footer.foot{padding:16px;text-align:center;font-size:11px;color:var(--text-faint
 
 <div id="app" hidden>
   <header class="topbar">
-    <div class="brand"><span class="dot"></span>팀 스크럼 스케줄러</div>
+    <div class="brand">팀 스크럼 스케줄러</div>
     <div class="tabs" id="mainTabs">
       <button data-tab="schedule" class="active">일정</button>
       <button data-tab="task">과제</button>
     </div>
-    <select class="selectPill" id="memberFilter"><option value="all">전체 구성원</option></select>
+    <div class="selectWrap"><svg class="selectIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><select class="selectPill" id="memberFilter"><option value="all">전체 구성원</option></select></div>
     <div class="spacer"></div>
     <button class="iconBtn solid" id="newBtn">+ 새로 만들기</button>
     <button class="iconBtn" id="adminBtn" hidden>관리</button>
-    <button class="avatarBtn" id="accountBtn"><span class="avatar" id="meAvatar">?</span><span class="who"><b id="meName">-</b><span id="meRole">-</span></span></button>
+    <button class="avatarBtn" id="accountBtn"><span class="who"><b id="meName">-</b><span id="meRole">-</span></span></button>
   </header>
 
   <main>
@@ -669,8 +672,6 @@ function populateMemberFilter(){
 }
 function renderMe(){
   if(!S.me)return;
-  document.getElementById('meAvatar').textContent=initials(S.me.name);
-  document.getElementById('meAvatar').style.background=colorFor(S.me.id);
   document.getElementById('meName').textContent=S.me.name;
   document.getElementById('meRole').textContent=S.me.role==='admin'?'관리자':'편집자';
   document.getElementById('adminBtn').hidden=!isAdmin();
