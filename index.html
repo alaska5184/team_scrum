@@ -748,23 +748,9 @@ function renderTimeline(){
     html+='<div class="tlToday" style="left:'+(todayIdx*dayWidth)+'px;"></div>';
   }
 
-  let rowH=30, gap=6;
-  html+='<div class="tlSectionLabel" style="top:0">고정 일정</div>';
-  const fixedTop=26;
-  if(fixedItems.length===0){
-    html+='<div style="position:absolute;top:'+(fixedTop)+'px;left:12px;color:var(--text-faint);font-size:11.5px;">해당 일정이 없습니다.</div>';
-  } else {
-    fixedItems.forEach((it,idx)=>{
-      const left=dayDiff(winStart,it.c.cs)*dayWidth+2;
-      const w=Math.max(dayWidth-4,(dayDiff(it.c.cs,it.c.ce)+1)*dayWidth-4);
-      const top=fixedTop+idx*(rowH+gap);
-      html+='<div class="bar '+it.type+'" data-kind="'+it.type+'" data-id="'+it.data.id+'" style="left:'+left+'px;top:'+top+'px;height:'+rowH+'px;width:'+w+'px;border-color:'+it.color+';color:'+it.color+';"><span class="lbl">'+(it.c.clippedStart?'◀':'')+esc(it.label)+(it.c.clippedEnd?'▶':'')+'</span></div>';
-    });
-  }
-  const rowsUsed=Math.max(1,fixedItems.length);
-  const taskTop=fixedTop+rowsUsed*(rowH+gap)+26;
-  html+='<div class="tlSectionLabel" style="position:absolute;left:8px;top:'+(taskTop-24)+'px;">과제 트랙</div>';
-  rowH=44;
+  let rowH=44, gap=6;
+  const taskTop=26;
+  html+='<div class="tlSectionLabel" style="top:0">과제 트랙</div>';
   let taskRows=1;
   let labelHtml='';
   if(S.density==='full'){
