@@ -825,10 +825,10 @@ function renderScrum(){
       const cat=t&&t.category?'<span class="cat">'+esc(t.category)+'</span>':'';
       const ticketNo=t&&t.ticket?'<span class="ticketNo">'+esc(t.ticket)+'</span>':'';
       const subs=t&&t.subtasks&&t.subtasks.length?t.subtasks:null;
-      const subsHtml=subs?('<div class="subChecklist">'+subs.map(s=>'<div class="subRow"><span class="subTitle">'+esc(s.title||'')+'</span><div class="progBar"><i style="width:'+clamp(s.progress||0,0,100)+'%"></i></div><span class="progNum">'+(s.progress||0)+'%</span></div>').join('')+'</div>'):'';
+      const subsHtml=subs?('<div class="subChecklist">'+subs.map(s=>'<div class="subRow"><span class="subTitle">'+esc(s.title||'')+'</span></div>').join('')+'</div>'):'';
       return '<div class="item"><div class="taskLine">'+(t?'<span class="code">'+esc(t.code)+'</span>'+esc(t.title):'<span>기타</span>')+cat+ticketNo+prio+'</div>'
         +(it.note?'<div class="note">'+esc(it.note)+'</div>':'')
-        +(subsHtml||'<div class="metaRow"><div class="progBar"><i style="width:'+clamp(it.progress||0,0,100)+'%"></i></div><span class="progNum">'+(it.progress||0)+'%</span></div>')
+        +subsHtml
         +(it.link?'<div style="margin-top:5px;"><a class="outlink" target="_blank" rel="noopener" href="'+esc(it.link)+'">산출물 링크 ↗</a></div>':'')
         +'</div>';
     }).join('') || '<div class="note">작성된 항목이 없습니다.</div>';
