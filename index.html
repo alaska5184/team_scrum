@@ -124,15 +124,6 @@ main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:1152px;marg
 
 /* ---------- timeline ---------- */
 .timelineWrap{position:relative;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:stretch;}
-.tlLabelCol{flex:none;width:230px;overflow:hidden;border-right:1px solid var(--border);max-height:440px;background:var(--surface);}
-.tlLabelSpacer{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--border);height:40px;}
-.tlLabelInner{position:relative;}
-.tlTaskLabel{position:absolute;left:0;right:0;padding:3px 10px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:2px;border-bottom:1px dashed var(--border);cursor:pointer;overflow:hidden;}
-.tlTaskLabel:hover{background:var(--surface-2);}
-.tlTaskLabel .tlLabelTop{display:flex;align-items:center;gap:5px;overflow:hidden;}
-.tlTaskLabel .code{font-family:var(--font-mono);font-size:10px;color:var(--accent-strong);background:var(--accent-soft);border-radius:4px;padding:1px 5px;flex:none;}
-.tlTaskLabel .tlTitle{font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.tlTaskLabel .tlMeta{font-size:10.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .timelineScroll{flex:1 1 auto;overflow-x:auto;overflow-y:auto;position:relative;max-height:440px;}
 .timelineInner{position:relative;}
 .tlHeaderRow{display:flex;position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--border);}
@@ -335,7 +326,6 @@ footer.foot{padding:16px;text-align:center;font-size:11px;color:var(--text-faint
         <div class="segTabs" id="zoomTabs"><button data-z="week" class="active">1주</button><button data-z="twoweek">2주</button></div>
       </div>
       <div class="timelineWrap">
-      <div class="tlLabelCol" id="tlLabelCol"><div class="tlLabelSpacer"></div><div class="tlLabelInner" id="tlLabelInner"></div></div>
         <div class="timelineScroll" id="tlScroll">
           <div class="timelineInner" id="tlInner"></div>
         </div>
@@ -800,21 +790,6 @@ function renderTimeline(){
     });
   });
 
-  const labelInner=document.getElementById('tlLabelInner');
-  if(labelInner){
-    labelInner.innerHTML=labelHtml;
-    labelInner.style.height=bodyH+'px';
-    labelInner.querySelectorAll('.tlTaskLabel').forEach(el=>{
-      el.addEventListener('click',()=>openTaskDetail(el.dataset.id));
-    });
-  }
-  const tlScrollEl=document.getElementById('tlScroll');
-  const tlLabelColEl=document.getElementById('tlLabelCol');
-  if(tlScrollEl && tlLabelColEl && !tlScrollEl.dataset.syncWired){
-    tlScrollEl.dataset.syncWired='1';
-    tlScrollEl.addEventListener('scroll',()=>{ tlLabelColEl.scrollTop=tlScrollEl.scrollTop; });
-    tlLabelColEl.addEventListener('wheel',(e)=>{ tlScrollEl.scrollTop+=e.deltaY; e.preventDefault(); },{passive:false});
-  }
 }
 
 /* ---------------- scrum board ---------------- */
