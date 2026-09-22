@@ -772,7 +772,7 @@ function renderTimeline(){
       });
     }
   } else { taskRows=0; html+='<div style="position:absolute;top:'+taskTop+'px;left:12px;color:var(--text-faint);font-size:11.5px;">요약 보기에서는 과제 트랙이 숨겨집니다.</div>'; }
-  const bodyH=taskTop+taskRows*(rowH+gap)+16;
+  const bodyH=Math.max(taskTop+taskRows*(rowH+gap)+16, Math.round(window.innerHeight*0.5));
   html+='</div>';
   inner.innerHTML=html;
   inner.style.height=bodyH+'px';
