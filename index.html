@@ -164,8 +164,9 @@ main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:1152px;marg
 .scrumCol h3{margin:2px 6px 10px;font-size:12.5px;font-weight:800;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
 .scrumCol h3 .badge{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:1px 8px;font-size:11px;}
 .scrumEmpty{color:var(--text-faint);font-size:12px;text-align:center;padding:20px 4px;}
-.pendingRow{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-md);background:var(--surface);border:1px dashed var(--border-strong);margin-bottom:8px;}
-.pendingRow button.writeBtn{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--accent-strong);background:var(--accent-soft);border:none;border-radius:999px;padding:5px 11px;}
+.pendingCard{margin-bottom:10px;}
+.pendingWriteBox{display:block;width:100%;margin-top:8px;padding:10px 12px;border:1px dashed var(--border-strong);border-radius:var(--r-md);background:var(--surface-2);color:var(--text-muted);font-size:12px;font-weight:600;text-align:left;cursor:pointer;}
+.pendingWriteBox:hover{background:var(--accent-soft);border-color:var(--accent-strong);color:var(--accent-strong);}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:12px;margin-bottom:10px;box-shadow:var(--shadow-sm);}
 .card .cHead{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
 .card .cHead b{font-size:13px;}
@@ -810,8 +811,8 @@ function renderScrum(){
 
   const pendingEl=document.getElementById('pendingList');
   pendingEl.innerHTML = pending.length? pending.map(m=>
-    '<div class="pendingRow"><span class="avatar" style="background:'+colorFor(m.id)+'">'+initials(m.name)+'</span>'+esc(m.name)
-    +(S.me?'<button class="writeBtn" data-write="'+m.id+'">'+(S.me.id===m.id?'작성하기':'대신 작성')+'</button>':'')
+    '<div class="card pendingCard"><div class="cHead"><span class="avatar" style="background:'+colorFor(m.id)+'">'+initials(m.name)+'</span><b>'+esc(m.name)+'</b><span class="role">'+esc(m.team||'')+'</span></div>'
+    +(S.me?'<button class="pendingWriteBox" data-write="'+m.id+'">+ '+(S.me.id===m.id?'스크럼 작성':esc(m.name)+'님 대신 작성')+'</button>':'')
     +'</div>').join('') : '<div class="scrumEmpty">해당 카드가 없습니다.</div>';
   pendingEl.querySelectorAll('[data-write]').forEach(b=>b.addEventListener('click',()=>openScrumEditor(b.dataset.write,null)));
 
