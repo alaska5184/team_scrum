@@ -1023,7 +1023,7 @@ function openScrumEditor(memberId,entry){
       +'<div class="field2 full"><label>작업 내용</label><textarea data-f="note" data-idx="'+idx+'" placeholder="오늘 진행한 작업을 적어주세요">'+esc(it.note||'')+'</textarea></div>'
       +'<div class="field2"><label>우선순위</label><select data-f="priority" data-idx="'+idx+'"><option value="p1" '+(it.priority==='p1'?'selected':'')+'>우선순위 1</option><option value="p2" '+(it.priority==='p2'?'selected':'')+'>우선순위 2</option><option value="p3" '+(it.priority==='p3'?'selected':'')+'>우선순위 3</option></select></div>'
       +'<div class="field2"><label>진행률(%)</label><input data-f="progress" data-idx="'+idx+'" type="number" min="0" max="100" value="'+(it.progress||0)+'"></div>'
-      +'<div class="field2 full"><label>산출물 링크 (선택)</label><input data-f="link" data-idx="'+idx+'" type="url" placeholder="https://..." value="'+esc(it.link||'')+'"></div>'
+      +'<div class="field2 full"><label>산출물 링크 (선택)</label><input data-f="link" data-idx="'+idx+'" type="text" placeholder="https://..." value="'+esc(it.link||'')+'"></div>'
       +'</div></div>';
   }
   function reviewRowHtml(r,idx){
@@ -1080,6 +1080,7 @@ function openScrumEditor(memberId,entry){
       root.querySelector('#scrumForm').addEventListener('submit',async e=>{
         e.preventDefault();
         if(!canEdit)return;
+        items.forEach(it=>{ if(it.link && !/^https?:\/\//i.test(it.link)) it.link='https://'+it.link; });
         const id=S.scrumDate+'_'+memberId;
         const data={date:S.scrumDate,memberId:memberId,status:'submitted',items:items,reviewRequests:reviews};
         if(entry) await store.scrum.update(id,data); else await store.scrum.add(Object.assign({id:id},data));
