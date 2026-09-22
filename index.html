@@ -338,8 +338,8 @@ footer.foot{padding:16px;text-align:center;font-size:11px;color:var(--text-faint
         <span class="cnt" id="scrumCnt"></span>
       </div>
       <div class="scrumCols">
-        <div class="scrumCol"><h3><span class="statusDot pending"></span>작성 전 <span class="badge" id="pendingCount">0</span></h3><div id="pendingList"></div></div>
-        <div class="scrumCol"><h3><span class="statusDot done"></span>작성 완료 <span class="badge" id="doneCount">0</span></h3><div id="doneList"></div></div>
+        <div class="scrumCol"><h3><span class="statusDot pending"></span>작성 전</h3><div id="pendingList"></div></div>
+        <div class="scrumCol"><h3><span class="statusDot done"></span>작성 완료</h3><div id="doneList"></div></div>
       </div>
     </section>
 
@@ -807,8 +807,6 @@ function renderScrum(){
 
   const pending=members.filter(m=>!entriesByMember.has(m.id));
   const done=members.filter(m=>entriesByMember.has(m.id));
-  document.getElementById('pendingCount').textContent=pending.length;
-  document.getElementById('doneCount').textContent=done.length;
   document.getElementById('scrumCnt').textContent='구성원 '+members.length+'명 중 '+done.length+'명 작성 완료';
 
   const pendingEl=document.getElementById('pendingList');
