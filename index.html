@@ -144,7 +144,7 @@ main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:1152px;marg
 .tlBg.holiday{background:var(--holiday-bg);}
 .tlToday{position:absolute;top:0;bottom:0;width:2px;background:var(--today-line);z-index:4;}
 .tlSection{position:relative;}
-.tlSectionLabel{position:sticky;left:0;z-index:3;display:inline-block;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;margin:8px 0 0 8px;}
+
 .tlBody{position:relative;}
 .bar{position:absolute;border-radius:8px;padding:0 9px;display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;white-space:nowrap;overflow:visible;border:1px solid transparent;}
 .bar span.lbl{overflow:hidden;text-overflow:ellipsis;}
@@ -153,6 +153,11 @@ main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:1152px;marg
 .bar.task .code{font-family:var(--font-mono);font-size:10px;color:var(--accent-strong);background:var(--accent-soft);border-radius:4px;padding:1px 5px;flex:none;}
 .bar.task .prog{flex:none;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);}
 .bar.task.closed{opacity:.55;}
+.bar.task{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:5px 9px;}
+.bar.task .tlBarTop{display:flex;align-items:center;gap:5px;width:100%;overflow:hidden;}
+.bar.task .tlBarTop .lbl{overflow:hidden;text-overflow:ellipsis;}
+.bar.task .tlBarCat{flex:none;font-size:9.5px;font-weight:700;color:var(--text-muted);background:var(--surface-2);border-radius:4px;padding:1px 5px;}
+.bar.task .tlBarMeta{font-size:10px;color:var(--text-muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
 .bar:hover{filter:brightness(0.98);z-index:6;}
 .emptyNote{padding:22px;text-align:center;color:var(--text-faint);font-size:12.5px;}
 
@@ -828,11 +833,9 @@ function renderTimeline(){
     html+='<div class="tlToday" style="left:'+(todayIdx*dayWidth)+'px;"></div>';
   }
 
-  let rowH=44, gap=6;
+  let rowH=54, gap=6;
   const taskTop=26;
-  html+='<div class="tlSectionLabel" style="top:0">과제 트랙</div>';
   let taskRows=1;
-  let labelHtml='';
   if(S.density==='full'){
     if(taskItems.length===0){
       html+='<div style="position:absolute;top:'+taskTop+'px;left:12px;color:var(--text-faint);font-size:11.5px;">표시할 과제가 없습니다.</div>';
@@ -843,9 +846,7 @@ function renderTimeline(){
         const left=dayDiff(winStart,it.c.cs)*dayWidth+2;
         const w=Math.max(dayWidth-4,(dayDiff(it.c.cs,it.c.ce)+1)*dayWidth-4);
         const top=taskTop+idx*(rowH+gap);
-        html+='<div class="bar task'+(t.status==='closed'?' closed':'')+'" data-kind="task" data-id="'+t.id+'" style="left:'+left+'px;top:'+top+'px;height:'+rowH+'px;width:'+w+'px;">'
-          +(it.c.clippedStart?'':'<span class="code">'+esc(t.code)+'</span>')+'<span class="lbl">'+esc(t.title)+'</span><span class="prog">'+t.progress+'%</span></div>';
-        const catTag=t.category?'<span class="cat">'+esc(t.category)+'</span>':'';
+        const catTag=t.category?'<span class="tlBarCat">'+esc(t.category)+'</span>':'';
         const uxTxt=esc((memberById(t.uxAssignee)||{}).name||'미정');
         const desNames=(t.designAssignees||[]).map(id=>(memberById(id)||{}).name).filter(Boolean);
         const desTxt=esc(desNames.length?desNames.join(', '):'미정');
@@ -855,9 +856,9 @@ function renderTimeline(){
         if(ticketTxt) metaParts.push(ticketTxt);
         metaParts.push(t.progress+'%');
         if(cnt) metaParts.push(cnt);
-        labelHtml+='<div class="tlTaskLabel" data-id="'+t.id+'" style="top:'+top+'px;height:'+rowH+'px;">'
-          +'<div class="tlLabelTop">'+catTag+'<span class="code">'+esc(t.code)+'</span><span class="tlTitle">'+esc(t.title)+'</span></div>'
-          +'<div class="tlMeta">'+metaParts.join(' · ')+'</div>'
+        html+='<div class="bar task'+(t.status==='closed'?' closed':'')+'" data-kind="task" data-id="'+t.id+'" style="left:'+left+'px;top:'+top+'px;height:'+rowH+'px;width:'+w+'px;">'
+          +'<div class="tlBarTop">'+(it.c.clippedStart?'':'<span class="code">'+esc(t.code)+'</span>')+catTag+'<span class="lbl">'+esc(t.title)+'</span></div>'
+          +'<div class="tlBarMeta">'+metaParts.join(' · ')+'</div>'
           +'</div>';
       });
     }
