@@ -118,9 +118,10 @@ main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:1152px;marg
 .segTabs button.active{background:var(--accent-soft);color:var(--accent-strong);}
 .navBtns{display:flex;gap:4px;}
 .navBtns button{height:30px;border-radius:var(--r-sm);border:1px solid var(--border-strong);background:var(--surface-2);font-size:13px;white-space:nowrap;}
-.navBtns button#prevBtn,.navBtns button#nextBtn{width:30px;padding:0;}
+.navBtns button#prevBtn,.navBtns button#nextBtn{width:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;}
 .navBtns button#todayBtn{width:auto;padding:0 14px;}
 .navBtns button:hover{border-color:var(--accent);color:var(--accent-strong);}
+.lucide-ic{flex:none;vertical-align:-2px;}
 
 /* ---------- timeline ---------- */
 .timelineWrap{position:relative;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:stretch;}
@@ -173,7 +174,7 @@ main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:1152px;marg
 .card .cHead{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
 .card .cHead b{font-size:13px;}
 .card .cHead .role{font-size:10.5px;color:var(--text-faint);border:1px solid var(--border);border-radius:999px;padding:0 7px;}
-.card .cHead .more{margin-left:auto;border:none;background:none;color:var(--text-faint);font-size:16px;line-height:1;padding:2px 4px;}
+.card .cHead .more{margin-left:auto;border:none;background:none;color:var(--text-faint);font-size:16px;line-height:1;padding:2px 4px;display:inline-flex;align-items:center;justify-content:center;}
 .card .cHead .more:hover{color:var(--accent);}
 .item{padding:8px 0;border-top:1px solid var(--border);}
 .item:first-of-type{border-top:none;}
@@ -202,7 +203,7 @@ main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:1152px;marg
 .reviewRow .rText{color:var(--text-muted);}
 .reviewRow .rTo{color:var(--accent-strong);font-weight:700;}
 .reviewRow .rDate{color:var(--text-faint);font-family:var(--font-mono);margin-left:auto;}
-.loadYesterdayBtn{width:100%;padding:9px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--text-muted);font-weight:700;font-size:12px;margin-bottom:14px;}
+.loadYesterdayBtn{width:100%;padding:9px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--text-muted);font-weight:700;font-size:12px;margin-bottom:14px;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
 .loadYesterdayBtn:hover{color:var(--accent-strong);border-color:var(--accent);}
 .sectionLabel{font-size:12.5px;font-weight:800;color:var(--text-muted);margin:16px 2px 8px;}
 .reviewEditRow{display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:6px;margin-bottom:8px;align-items:center;}
@@ -228,7 +229,7 @@ table.tasks tr:hover td{background:var(--surface-2);}
 .tStatus.ongoing{background:var(--info-soft);color:var(--info);}
 .tStatus.closed{background:var(--border);color:var(--text-muted);}
 .miniProg{display:flex;align-items:center;gap:6px;min-width:90px;}
-.rowActions button{border:none;background:none;color:var(--text-faint);font-size:12px;padding:3px 6px;}
+.rowActions button{border:none;background:none;color:var(--text-faint);font-size:12px;padding:3px 6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
 .rowActions button:hover{color:var(--accent);}
 
 /* ---------- task view toggle / stats / cards / list ---------- */
@@ -247,7 +248,7 @@ table.tasks tr:hover td{background:var(--surface-2);}
 .taskCard .tcTitle{font-size:14px;font-weight:800;}
 .taskCard .tlDate{font-size:11px;color:var(--text-faint);font-family:var(--font-mono);white-space:nowrap;}
 .taskCard .tcActions{margin-left:auto;display:flex;gap:2px;}
-.taskCard .tcActions button{border:none;background:none;color:var(--text-faint);font-size:12px;padding:3px 6px;cursor:pointer;}
+.taskCard .tcActions button{border:none;background:none;color:var(--text-faint);font-size:12px;padding:3px 6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
 .taskCard .tcActions button:hover{color:var(--accent);}
 .taskCard .tcAssignees{font-size:12px;color:var(--text-muted);margin-bottom:8px;}
 .taskCard .tcProgRow{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
@@ -272,7 +273,7 @@ table.tasks tr:hover td{background:var(--surface-2);}
 .tlRight{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--text-muted);white-space:nowrap;}
 .tlRight b{color:var(--text);font-weight:800;}
 .tlActions{display:flex;gap:2px;}
-.tlActions button{border:none;background:none;color:var(--text-faint);font-size:12px;padding:3px 6px;cursor:pointer;}
+.tlActions button{border:none;background:none;color:var(--text-faint);font-size:12px;padding:3px 6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
 .tlActions button:hover{color:var(--accent);}
 
 /* ---------- modal ---------- */
@@ -282,7 +283,7 @@ table.tasks tr:hover td{background:var(--surface-2);}
 @media (min-width:640px){.modal{border-radius:var(--r-lg);}}
 .modal h3{margin:0 0 4px;font-size:16.5px;font-weight:900;}
 .modal p.desc{margin:0 0 16px;font-size:12.5px;color:var(--text-muted);}
-.modalClose{position:sticky;float:right;top:0;border:none;background:var(--surface-2);border-radius:50%;width:28px;height:28px;color:var(--text-muted);font-size:14px;}
+.modalClose{position:sticky;float:right;top:0;border:none;background:var(--surface-2);border-radius:50%;width:28px;height:28px;color:var(--text-muted);font-size:14px;display:inline-flex;align-items:center;justify-content:center;}
 .formGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .formGrid .full{grid-column:1/-1;}
 @media (max-width:420px){.formGrid{grid-template-columns:1fr;}}
@@ -358,7 +359,7 @@ footer.foot{padding:16px;text-align:center;font-size:11px;color:var(--text-faint
     </div>
     <div class="selectWrap"><svg class="selectIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><select class="selectPill" id="memberFilter"><option value="all">전체 구성원</option></select></div>
     <div class="spacer"></div>
-    <button class="iconBtn solid" id="newBtn">+ 새로 만들기</button>
+    <button class="iconBtn solid" id="newBtn"><svg class="lucide-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>새로 만들기</button>
     <button class="iconBtn" id="adminBtn" hidden>관리</button>
     <button class="avatarBtn" id="accountBtn"><span class="who"><b id="meName">-</b><span id="meRole">-</span></span></button>
   </header>
@@ -367,7 +368,7 @@ footer.foot{padding:16px;text-align:center;font-size:11px;color:var(--text-faint
     <section id="scheduleView">
       <div class="scheduleBar">
         <h2 id="rangeLabel">-</h2>
-        <div class="navBtns"><button id="prevBtn" title="이전 기간">‹</button><button id="todayBtn" title="오늘">오늘</button><button id="nextBtn" title="다음 기간">›</button></div>
+        <div class="navBtns"><button id="prevBtn" title="이전 기간"><svg class="lucide-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button><button id="todayBtn" title="오늘">오늘</button><button id="nextBtn" title="다음 기간"><svg class="lucide-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div>
         <div class="spacer"></div>
         <div class="segTabs" id="densityTabs"><button data-d="summary">요약</button><button data-d="full" class="active">전체</button></div>
         <div class="segTabs" id="zoomTabs"><button data-z="week" class="active">1주</button><button data-z="twoweek">2주</button></div>
@@ -438,6 +439,27 @@ function kDateDow(d){return kDate(d)+' ('+DOW[d.getDay()]+')';}
 function uid(p){return (p||'id')+'_'+Math.random().toString(36).slice(2,10);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function clamp(n,a,b){return Math.max(a,Math.min(b,n));}
+
+/* ---------------- Lucide icons (inline SVG, stroke=currentColor) ---------------- */
+const ICONS={
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  pencil:'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+  trash:'<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  externalLink:'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  arrowRight:'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  ellipsis:'<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  palmtree:'<path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4"/><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-3l-1-1-1 1h-3"/><path d="M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 2.12-2.12c-1.95-1.96-5.27-1.8-7.42.35"/><path d="M11 15.5c.5 2.5-.17 4.5-1 6.5h4c2-5.5-.5-12-1-14"/>',
+  briefcase:'<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+  clipboardList:'<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+  rotateCcw:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  chevronLeft:'<path d="m15 18-6-6 6-6"/>',
+  chevronRight:'<path d="m9 18 6-6-6-6"/>'
+};
+function icon(name,size){
+  return '<svg class="lucide-ic" width="'+(size||14)+'" height="'+(size||14)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[name]||'')+'</svg>';
+}
 
 const PALETTE=['#5B5FE9','#E9835B','#1C9A6C','#C97A12','#2E72D9','#B84BC9','#4B9C9C','#C94B7A'];
 function colorFor(seed){let h=0;for(const c of String(seed))h=(h*31+c.charCodeAt(0))>>>0;return PALETTE[h%PALETTE.length];}
@@ -755,8 +777,8 @@ function renderTimeline(){
   }
 
   const fixedItems=[];
-  S.vacations.forEach(v=>{ if(filterIds.has(v.memberId)){ const c=clipToWindow(v.start,v.end); if(c) fixedItems.push({type:'vac',c,color:colorFor(v.memberId),label:'🏖️ '+((memberById(v.memberId)||{}).name||'')+' 휴가'+(v.half==='am'?' · 오전 반차':v.half==='pm'?' · 오후 반차':'')+(v.note?' · '+v.note:''),data:v}); } });
-  S.externals.forEach(x=>{ if(x.memberIds.some(id=>filterIds.has(id))){ const c=clipToWindow(x.start,x.end); if(c) fixedItems.push({type:'ext',c,color:colorFor(x.memberIds[0]||x.id),label:'🕴️ '+x.title+' · '+x.memberIds.map(id=>(memberById(id)||{}).name).filter(Boolean).join(', '),data:x}); } });
+  S.vacations.forEach(v=>{ if(filterIds.has(v.memberId)){ const c=clipToWindow(v.start,v.end); if(c) fixedItems.push({type:'vac',c,color:colorFor(v.memberId),label:''+icon('palmtree',16)+''+((memberById(v.memberId)||{}).name||'')+' 휴가'+(v.half==='am'?' · 오전 반차':v.half==='pm'?' · 오후 반차':'')+(v.note?' · '+v.note:''),data:v}); } });
+  S.externals.forEach(x=>{ if(x.memberIds.some(id=>filterIds.has(id))){ const c=clipToWindow(x.start,x.end); if(c) fixedItems.push({type:'ext',c,color:colorFor(x.memberIds[0]||x.id),label:''+icon('briefcase',16)+''+x.title+' · '+x.memberIds.map(id=>(memberById(id)||{}).name).filter(Boolean).join(', '),data:x}); } });
 
   const taskItems=[];
   if(S.density==='full'){
@@ -883,17 +905,17 @@ function renderScrum(){
       return '<div class="item"><div class="taskLine">'+(t?'<span class="code">'+esc(t.code)+'</span>'+esc(t.title):'<span>기타</span>')+cat+ticketNo+prio+'</div>'
         +(it.note?'<div class="note">'+esc(it.note)+'</div>':'')
         +subsHtml
-        +(it.link?'<div style="margin-top:5px;"><a class="outlink" target="_blank" rel="noopener" href="'+esc(it.link)+'">산출물 링크 ↗</a></div>':'')
+        +(it.link?'<div style="margin-top:5px;"><a class="outlink" target="_blank" rel="noopener" href="'+esc(it.link)+'">산출물 링크 '+icon('externalLink',12)+'</a></div>':'')
         +'</div>';
     }).join('') || '<div class="note">작성된 항목이 없습니다.</div>';
     const reviewHtml=(entry.reviewRequests&&entry.reviewRequests.length)?('<div class="reviewList">'+entry.reviewRequests.map(r=>{
       const rm=memberById(r.mentionId);
       const dLabel=r.date?(Number(r.date.slice(5,7))+'.'+Number(r.date.slice(8,10))):'';
-      return '<div class="reviewRow"><span class="rTag">리뷰 대기</span><span class="rText">'+esc(r.text||'')+'</span>'+(rm?'<span class="rTo">→ @'+esc(rm.name)+'</span>':'')+(dLabel?'<span class="rDate">'+dLabel+'</span>':'')+'</div>';
+      return '<div class="reviewRow"><span class="rTag">리뷰 대기</span><span class="rText">'+esc(r.text||'')+'</span>'+(rm?'<span class="rTo">'+icon('arrowRight',12)+' @'+esc(rm.name)+'</span>':'')+(dLabel?'<span class="rDate">'+dLabel+'</span>':'')+'</div>';
     }).join('')+'</div>'):'';
     const canEdit=S.me && (S.me.id===m.id || isAdmin());
     return '<div class="card"><div class="cHead"><span class="avatar" style="background:'+colorFor(m.id)+'">'+initials(m.name)+'</span><b>'+esc(m.name)+'</b><span class="role">'+esc(m.team||'')+'</span>'
-      +(canEdit?'<button class="more" data-more="'+m.id+'" title="더보기">⋯</button>':'')+'</div>'+itemsHtml+reviewHtml+'</div>';
+      +(canEdit?'<button class="more" data-more="'+m.id+'" title="더보기">'+icon('ellipsis',16)+'</button>':'')+'</div>'+itemsHtml+reviewHtml+'</div>';
   }).join('') : '<div class="scrumEmpty">해당 카드가 없습니다.</div>';
   doneEl.querySelectorAll('[data-more]').forEach(b=>b.addEventListener('click',()=>{
     const mid=b.dataset.more; const entry=entriesByMember.get(mid);
@@ -953,7 +975,7 @@ function renderTasks(){
       '<div class="tcProgRow"><div class="progBar"><i style="width:'+t.progress+'%"></i></div><span class="progNum">'+t.progress+'%</span></div>'
       +'<div class="tcSubList">'+units.map((u,i)=>{
         const checked=u.progress>=100;
-        return '<div class="tcSub"><div class="tcSubTop"><span class="tcSubCheck'+(checked?' checked':'')+'">'+(checked?'✓':'')+'</span><span class="tcSubIdx">'+String(i+1).padStart(2,'0')+'</span><span class="tcSubTitle">'+esc(u.title||'')+'</span></div><div class="progBar"><i style="width:'+u.progress+'%"></i></div><span class="progNum">'+u.progress+'%</span></div>';
+        return '<div class="tcSub"><div class="tcSubTop"><span class="tcSubCheck'+(checked?' checked':'')+'">'+(checked?icon('check',10):'')+'</span><span class="tcSubIdx">'+String(i+1).padStart(2,'0')+'</span><span class="tcSubTitle">'+esc(u.title||'')+'</span></div><div class="progBar"><i style="width:'+u.progress+'%"></i></div><span class="progNum">'+u.progress+'%</span></div>';
       }).join('')+'</div>'
     ) : '<div class="tcEmpty">하위 Task가 없습니다.</div>';
     return '<div class="taskCard'+(closed?' isClosed':'')+'">'
@@ -962,7 +984,7 @@ function renderTasks(){
       +(t.category?'<span class="tCat">'+esc(t.category)+'</span>':'')
       +(t.ticket?'<span class="ticketNo">'+esc(t.ticket)+'</span>':'')
       +'<span class="tlDate">'+esc(t.start)+' ~ '+esc(t.end)+'</span>'
-      +'<span class="tcActions"><button data-edit="'+t.id+'" title="수정">✎</button><button data-del="'+t.id+'" title="삭제">🗑</button></span>'
+      +'<span class="tcActions"><button data-edit="'+t.id+'" title="수정">'+icon('pencil')+'</button><button data-del="'+t.id+'" title="삭제">'+icon('trash')+'</button></span>'
       +'</div>'
       +'<div class="tcAssignees">UX '+(ux?esc(ux.name):'미정')+'&nbsp;&nbsp;Design '+(dz?esc(dz):'미정')+'</div>'
       +body
@@ -985,7 +1007,7 @@ function renderTasks(){
           +'<span>UX '+(ux?esc(ux.name):'미정')+' &nbsp;Design '+(dz?esc(dz):'미정')+'</span>'
         +'</div>'
       +'</div>'
-      +'<div class="tlRight"><b>Task '+units.length+'개</b><span>'+progText+'</span><span class="tlActions"><button data-edit="'+t.id+'" title="수정">✎</button><button data-del="'+t.id+'" title="삭제">🗑</button></span></div>'
+      +'<div class="tlRight"><b>Task '+units.length+'개</b><span>'+progText+'</span><span class="tlActions"><button data-edit="'+t.id+'" title="수정">'+icon('pencil')+'</button><button data-del="'+t.id+'" title="삭제">'+icon('trash')+'</button></span></div>'
       +'</div>';
   }).join('') : '<div class="scrumEmpty">과제가 없습니다.</div>';
 
@@ -1008,12 +1030,12 @@ function closeModal(){document.getElementById('modalRoot').innerHTML='';}
 /* -------- new item chooser -------- */
 function openNewChooser(){
   openModal(
-    '<button class="modalClose" onclick="window.__closeModal()">✕</button>'
+    '<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button>'
     +'<h3>새로 만들기</h3><p class="desc">추가할 항목을 선택하세요.</p>'
     +'<div style="display:flex;flex-direction:column;gap:8px;">'
-    +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="task">📋 새 과제</button>'
-    +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="vac">🏖️ 새 휴가</button>'
-    +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="ext">🕴️ 새 외근</button>'
+    +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="task">'+icon('clipboardList',16)+'새 과제</button>'
+    +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="vac">'+icon('palmtree',16)+'새 휴가</button>'
+    +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="ext">'+icon('briefcase',16)+'새 외근</button>'
     +'</div>', root=>{
       window.__closeModal=closeModal;
       root.querySelectorAll('[data-c]').forEach(b=>b.addEventListener('click',()=>{
@@ -1029,7 +1051,7 @@ function openTaskForm(task){
   task=task||{id:null,code:'',category:'',title:'',uxAssignee:'',designAssignees:[],ticket:'',start:fmt(TODAY),end:fmt(TODAY),progress:0,status:'ongoing',subtasks:[]};
   const memberOpts=S.members.map(m=>'<option value="'+m.id+'" '+(task.uxAssignee===m.id?'selected':'')+'>'+esc(m.name)+'</option>').join('');
   openModal(
-    '<button class="modalClose" onclick="window.__closeModal()">✕</button>'
+    '<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button>'
     +'<h3>'+(isEdit?'과제 수정':'새 과제')+'</h3><p class="desc">일정 타임라인과 과제 목록에 함께 표시됩니다.</p>'
     +'<form id="taskForm"><div class="formGrid">'
     +field('코드','code',task.code,'text','예: T101')
@@ -1066,7 +1088,7 @@ function openVacationForm(v){
   const isEdit=!!v;
   v=v||{id:null,memberId:S.me?S.me.id:'',start:fmt(TODAY),end:fmt(TODAY),note:'',half:'none'};
   const memberOpts=S.members.map(m=>'<option value="'+m.id+'" '+(v.memberId===m.id?'selected':'')+'>'+esc(m.name)+'</option>').join('');
-  openModal('<button class="modalClose" onclick="window.__closeModal()">✕</button><h3>'+(isEdit?'휴가 수정':'새 휴가')+'</h3>'
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>'+(isEdit?'휴가 수정':'새 휴가')+'</h3>'
     +'<form id="vacForm"><div class="formGrid">'
     +'<div class="field2 full"><label>구성원</label><select name="memberId">'+memberOpts+'</select></div>'
     +field('시작일','start',v.start,'date')+field('종료일','end',v.end,'date')
@@ -1089,7 +1111,7 @@ function openVacationForm(v){
 function openExternalForm(x){
   const isEdit=!!x;
   x=x||{id:null,title:'',memberIds:[],start:fmt(TODAY),end:fmt(TODAY),timeStart:'09:00',timeEnd:'18:00'};
-  openModal('<button class="modalClose" onclick="window.__closeModal()">✕</button><h3>'+(isEdit?'외근 수정':'새 외근')+'</h3>'
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>'+(isEdit?'외근 수정':'새 외근')+'</h3>'
     +'<form id="extForm"><div class="formGrid">'
     +'<div class="field2 full"><label>제목</label><input name="title" value="'+esc(x.title)+'" required></div>'
     +'<div class="field2 full"><label>대상 구성원</label><div class="chipRow" id="chipRow">'+S.members.map(m=>'<button type="button" class="chip'+(x.memberIds.includes(m.id)?' on':'')+'" data-mid="'+m.id+'">'+esc(m.name)+'</button>').join('')+'</div></div>'
@@ -1119,7 +1141,7 @@ function openTaskDetail(id){
   const ux=memberById(t.uxAssignee);
   const dz=(t.designAssignees||[]).map(mid=>memberById(mid)).filter(Boolean).map(m=>m.name).join(', ');
   const subs=(t.subtasks||[]).map(s=>'<div class="item"><div class="taskLine">'+esc(s.title)+'</div><div class="metaRow"><div class="progBar"><i style="width:'+(s.progress||0)+'%"></i></div><span class="progNum">'+(s.progress||0)+'%</span></div></div>').join('')||'<div class="note">하위 작업이 없습니다.</div>';
-  openModal('<button class="modalClose" onclick="window.__closeModal()">✕</button>'
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button>'
     +'<h3><span class="tCode">'+esc(t.code)+'</span> '+esc(t.title)+'</h3>'
     +'<p class="desc">'+(t.category||'-')+' · '+t.start+' ~ '+t.end+' · '+(t.ticket||'티켓 없음')+'</p>'
     +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;"><div class="progBar" style="height:8px;"><i style="width:'+t.progress+'%"></i></div><span class="progNum">'+t.progress+'%</span></div>'
@@ -1152,7 +1174,7 @@ function openScrumEditor(memberId,entry){
       +'<input type="text" data-rf="text" data-ridx="'+idx+'" placeholder="예: 서비스 신청 플로우" value="'+esc(r.text||'')+'">'
       +'<select data-rf="mentionId" data-ridx="'+idx+'">'+memberOpts+'</select>'
       +'<input type="date" data-rf="date" data-ridx="'+idx+'" value="'+esc(r.date||'')+'">'
-      +'<button type="button" data-rrm="'+idx+'">✕</button>'
+      +'<button type="button" data-rrm="'+idx+'">'+icon('x')+'</button>'
       +'</div>';
   }
   function render(root){
@@ -1171,10 +1193,10 @@ function openScrumEditor(memberId,entry){
   }
   const prevDateStr=fmt(addDays(parse(S.scrumDate),-1));
   const prevEntry=S.scrum.find(s=>s.date===prevDateStr && s.memberId===memberId);
-  openModal('<button class="modalClose" onclick="window.__closeModal()">✕</button>'
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button>'
     +'<h3>'+esc(member.name)+'님의 스크럼</h3><p class="desc">'+kDateDow(parse(S.scrumDate))+'</p>'
     +'<form id="scrumForm">'
-    +(canEdit&&prevEntry?'<button type="button" class="loadYesterdayBtn" id="loadYesterday">⟲ 어제 작성한 내용 불러오기</button>':'')
+    +(canEdit&&prevEntry?'<button type="button" class="loadYesterdayBtn" id="loadYesterday">'+icon('rotateCcw',14)+'어제 작성한 내용 불러오기</button>':'')
     +'<div id="itemsHost"></div>'
     +(canEdit?'<button type="button" class="addItemBtn" id="addItem">+ 항목 추가</button>':'')
     +'<div class="sectionLabel">리뷰 요청</div>'
@@ -1217,11 +1239,11 @@ function openAdmin(){
     if(tab==='members'){
       return S.members.map(m=>'<div class="adminRow"><span class="avatar" style="background:'+colorFor(m.id)+'">'+initials(m.name)+'</span>'
         +'<div class="info"><div class="n">'+esc(m.name)+' <span style="color:var(--text-faint);font-weight:400;">'+(m.role==='admin'?'· 관리자':'· 편집자')+'</span></div><div class="m">'+esc(m.email)+' · '+(m.team||'-')+'</div></div>'
-        +'<div class="rowActions"><button data-medit="'+m.id+'">✎</button>'+(S.members.length>1?'<button data-mdel="'+m.id+'">🗑</button>':'')+'</div></div>').join('')
+        +'<div class="rowActions"><button data-medit="'+m.id+'">'+icon('pencil')+'</button>'+(S.members.length>1?'<button data-mdel="'+m.id+'">'+icon('trash')+'</button>':'')+'</div></div>').join('')
         +'<div style="font-size:11.5px;color:var(--text-faint);padding:10px 2px 0;line-height:1.6;">새 팀원은 로그인 화면에서 이메일로 직접 회원가입하면 자동으로 이 목록에 추가돼요. 가입 후 이름·팀·역할은 여기서 조정해 주세요.</div>';
     }
     return S.holidays.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(h=>'<div class="adminRow"><div class="info"><div class="n">'+esc(h.name)+'</div><div class="m">'+h.date+'</div></div>'
-      +'<div class="rowActions"><button data-hedit="'+h.id+'">✎</button><button data-hdel="'+h.id+'">🗑</button></div></div>').join('')
+      +'<div class="rowActions"><button data-hedit="'+h.id+'">'+icon('pencil')+'</button><button data-hdel="'+h.id+'">'+icon('trash')+'</button></div></div>').join('')
       +'<button class="iconBtn solid" id="addHoliday" style="margin-top:6px;">+ 휴일 추가</button>';
   }
   function wire(root){
@@ -1240,13 +1262,13 @@ function openAdmin(){
     root.querySelectorAll('.adminTabs button').forEach(b=>b.classList.toggle('active',b.dataset.tabb===tab));
     wire(root);
   }
-  openModal('<button class="modalClose" onclick="window.__closeModal()">✕</button><h3>관리</h3><p class="desc">구성원과 공휴일을 관리합니다.</p>'
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>관리</h3><p class="desc">구성원과 공휴일을 관리합니다.</p>'
     +'<div class="adminTabs" style="padding:0 0 10px;"><button data-tabb="members" class="active">구성원</button><button data-tabb="holidays">공휴일</button></div>'
     +'<div id="adminBody"></div>', root=>{ window.__closeModal=closeModal; paint(root); });
 }
 function openMemberForm(m){
   if(!m)return;
-  openModal('<button class="modalClose" onclick="window.__closeModal()">✕</button><h3>구성원 수정</h3><p class="desc">이메일·비밀번호는 본인이 로그인 화면에서만 바꿀 수 있어요.</p>'
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>구성원 수정</h3><p class="desc">이메일·비밀번호는 본인이 로그인 화면에서만 바꿀 수 있어요.</p>'
     +'<form id="memForm"><div class="formGrid">'
     +field('이름','name',m.name,'text')
     +'<div class="field2"><label>이메일</label><input value="'+esc(m.email)+'" disabled></div>'
@@ -1268,7 +1290,7 @@ function openMemberForm(m){
 function openHolidayForm(h){
   const isEdit=!!h;
   h=h||{id:null,date:fmt(TODAY),name:''};
-  openModal('<button class="modalClose" onclick="window.__closeModal()">✕</button><h3>'+(isEdit?'휴일 수정':'휴일 추가')+'</h3>'
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>'+(isEdit?'휴일 수정':'휴일 추가')+'</h3>'
     +'<form id="holForm"><div class="formGrid">'+field('날짜','date',h.date,'date')+field('이름','name',h.name,'text')+'</div>'
     +'<div class="modalActions">'+(isEdit?'<button type="button" class="btnDanger" id="holDel">삭제</button>':'')+'<button type="button" class="btnGhost" onclick="window.__closeModal()">취소</button><button class="btnPrimary" style="width:auto;">저장</button></div></form>',
     root=>{ window.__closeModal=closeModal;
@@ -1285,7 +1307,7 @@ function openHolidayForm(h){
 /* -------- my account -------- */
 function openAccount(){
   const m=S.me; if(!m)return;
-  openModal('<button class="modalClose" onclick="window.__closeModal()">✕</button><h3>내 계정</h3>'
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>내 계정</h3>'
     +'<form id="accForm"><div class="formGrid">'
     +field('이름','name',m.name,'text')+field('새 비밀번호','password','','text','변경 시에만 입력')
     +'<div class="field2 full"><label>이메일</label><input value="'+esc(m.email)+'" disabled></div>'
