@@ -757,9 +757,8 @@ let dayWidth=64;
 function visibleMemberIds(){return S.memberFilter==='all'?S.members.map(m=>m.id):[S.memberFilter];}
 
 function computeDayWidth(){
-  const viewport=document.getElementById('tlScroll').clientWidth||360;
-  const n=viewLength();
-  dayWidth=clamp(Math.floor(viewport/n),34,220);
+  /* 고정 폭: 열 너비를 컨테이너에 맞춰 줄이지 않고, 영역 전체를 가로 스크롤로 볼 수 있게 합니다. */
+  dayWidth=92;
 }
 
 function renderTimeline(){
