@@ -850,7 +850,7 @@ function renderTimeline(){
         const uxTxt=esc((memberById(t.uxAssignee)||{}).name||'미정');
         const desNames=(t.designAssignees||[]).map(id=>(memberById(id)||{}).name).filter(Boolean);
         const desTxt=esc(desNames.length?desNames.join(', '):'미정');
-        const ticketTxt=t.ticket?'#'+esc(t.ticket):'';
+        const ticketTxt=t.ticket?esc(t.ticket):'';
         const cnt=(t.subtasks&&t.subtasks.length)?t.subtasks.length+'개':'';
         const metaParts=['UX '+uxTxt,'Design '+desTxt];
         if(ticketTxt) metaParts.push(ticketTxt);
