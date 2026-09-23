@@ -231,6 +231,50 @@ table.tasks tr:hover td{background:var(--surface-2);}
 .rowActions button{border:none;background:none;color:var(--text-faint);font-size:12px;padding:3px 6px;}
 .rowActions button:hover{color:var(--accent);}
 
+/* ---------- task view toggle / stats / cards / list ---------- */
+.viewToggle{margin-left:auto;display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:3px;}
+.viewToggle .vtBtn{border:none;background:transparent;font-size:12px;font-weight:700;color:var(--text-muted);padding:6px 14px;border-radius:999px;cursor:pointer;}
+.viewToggle .vtBtn.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);}
+.taskStats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;padding:0 16px 16px;}
+.tsBox{border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;background:var(--surface);}
+.tsBox.active{border-color:var(--accent-strong);box-shadow:0 0 0 1px var(--accent-strong) inset;}
+.tsBox .tsLabel{font-size:11.5px;color:var(--text-muted);margin-bottom:6px;}
+.tsBox .tsNum{font-size:20px;font-weight:900;}
+.taskCardView{padding:0 16px 24px;}
+.taskCard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow-sm);}
+.taskCard.isClosed{opacity:.55;}
+.taskCard .tcHead{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+.taskCard .tcTitle{font-size:14px;font-weight:800;}
+.taskCard .tlDate{font-size:11px;color:var(--text-faint);font-family:var(--font-mono);white-space:nowrap;}
+.taskCard .tcActions{margin-left:auto;display:flex;gap:2px;}
+.taskCard .tcActions button{border:none;background:none;color:var(--text-faint);font-size:12px;padding:3px 6px;cursor:pointer;}
+.taskCard .tcActions button:hover{color:var(--accent);}
+.taskCard .tcAssignees{font-size:12px;color:var(--text-muted);margin-bottom:8px;}
+.taskCard .tcProgRow{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.taskCard .tcProgRow .progNum{font-weight:700;}
+.taskCard .tcEmpty{font-size:12px;color:var(--text-faint);padding:6px 0 2px;}
+.taskCard .tcSubList{display:flex;flex-direction:column;gap:8px;}
+.taskCard .tcSub{background:var(--success-soft);border-radius:var(--r-sm);padding:10px 12px;}
+.taskCard .tcSub .tcSubTop{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.taskCard .tcSub .tcSubCheck{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--border-strong);flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.taskCard .tcSub .tcSubCheck.checked{background:var(--success);border-color:var(--success);}
+.taskCard .tcSub .tcSubIdx{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);}
+.taskCard .tcSub .tcSubTitle{flex:1;font-size:12.5px;font-weight:700;}
+.taskCard .tcSub .progBar{flex:1;}
+.taskCard .tcSub .progNum{margin-left:8px;}
+.taskListRows{padding:0 16px 24px;}
+.tlRow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 4px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.tlRow:last-child{border-bottom:none;}
+.tlRow.isClosed{opacity:.5;}
+.tlLeft{flex:1;min-width:0;}
+.tlLeft .tlTitleLine{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;}
+.tlLeft .tlMetaLine{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--text-muted);flex-wrap:wrap;margin-top:4px;}
+.tlRight{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--text-muted);white-space:nowrap;}
+.tlRight b{color:var(--text);font-weight:800;}
+.tlActions{display:flex;gap:2px;}
+.tlActions button{border:none;background:none;color:var(--text-faint);font-size:12px;padding:3px 6px;cursor:pointer;}
+.tlActions button:hover{color:var(--accent);}
+
 /* ---------- modal ---------- */
 .overlay{position:fixed;inset:0;background:rgba(15,16,26,.5);display:flex;align-items:flex-end;justify-content:center;z-index:100;padding:0;}
 @media (min-width:640px){.overlay{align-items:center;padding:20px;}}
@@ -344,13 +388,16 @@ footer.foot{padding:16px;text-align:center;font-size:11px;color:var(--text-faint
     </section>
 
     <section id="taskView" hidden>
-      <div class="taskToolbar"><h2>과제 목록</h2><span class="cnt" id="taskCnt" style="color:var(--text-muted);font-size:12px;"></span></div>
-      <div class="tableWrap">
-        <table class="tasks">
-          <thead><tr><th>코드</th><th>구분</th><th>과제명</th><th>담당</th><th>티켓</th><th>기간</th><th>진행률</th><th>상태</th><th></th></tr></thead>
-          <tbody id="taskTbody"></tbody>
-        </table>
+      <div class="taskToolbar">
+        <h2>과제 목록</h2><span class="cnt" id="taskCnt" style="color:var(--text-muted);font-size:12px;"></span>
+        <div class="viewToggle" id="taskViewToggle">
+          <button type="button" class="vtBtn active" data-view="card">카드보기</button>
+          <button type="button" class="vtBtn" data-view="list">목록보기</button>
+        </div>
       </div>
+      <div class="taskStats" id="taskStats"></div>
+      <div class="taskCardView" id="taskCardView"></div>
+      <div class="taskListRows" id="taskListRows" hidden></div>
     </section>
   </main>
   <footer class="foot">© 2026 팀 스크럼 스케줄러</footer>
@@ -631,6 +678,13 @@ function wireApp(){
     document.getElementById('scheduleView').hidden = S.tab!=='schedule';
     document.getElementById('taskView').hidden = S.tab!=='task';
   });
+  document.getElementById('taskViewToggle').addEventListener('click',e=>{
+    const b=e.target.closest('button[data-view]'); if(!b)return;
+    taskViewMode=b.dataset.view;
+    document.querySelectorAll('#taskViewToggle button').forEach(x=>x.classList.toggle('active',x===b));
+    document.getElementById('taskCardView').hidden = taskViewMode!=='card';
+    document.getElementById('taskListRows').hidden = taskViewMode!=='list';
+  });
   document.getElementById('memberFilter').addEventListener('change',e=>{S.memberFilter=e.target.value;renderTimeline();renderScrum();renderTasks();});
   document.getElementById('densityTabs').addEventListener('click',e=>{
     const b=e.target.closest('button[data-d]'); if(!b)return;
@@ -848,6 +902,11 @@ function renderScrum(){
 }
 
 /* ---------------- tasks table ---------------- */
+let taskViewMode='card';
+function taskUnitsOf(t){
+  if(t.subtasks && t.subtasks.length) return t.subtasks.map(s=>({title:s.title,progress:s.progress}));
+  return [];
+}
 function renderTasks(){
   if(document.getElementById('app').hidden) return;
   const filterIds=new Set(visibleMemberIds());
@@ -856,21 +915,82 @@ function renderTasks(){
     return assignees.length===0 || assignees.some(id=>filterIds.has(id));
   }).slice().sort((a,b)=>parse(b.start)-parse(a.start));
   document.getElementById('taskCnt').textContent=rows.length+'건';
-  document.getElementById('taskTbody').innerHTML = rows.map(t=>{
+
+  const remaining=rows.filter(t=>t.status!=='closed').length;
+  let inProgress=0, overdue=0, dueSoon=0, noProgress=0;
+  rows.forEach(t=>{
+    const units=taskUnitsOf(t);
+    if(units.length){
+      if(t.status!=='closed') units.forEach(u=>{ if(u.progress<100) inProgress++; });
+    }else if(t.status!=='closed' && (t.progress||0)<100){
+      inProgress++;
+    }
+    if(t.status!=='closed'){
+      const end=parse(t.end);
+      if(end<TODAY) overdue++;
+      else if(end<=addDays(TODAY,7)) dueSoon++;
+    }
+    if(!units.length && !((t.progress||0)>0)) noProgress++;
+  });
+  const stats=[
+    ['총 티켓',rows.length,true],
+    ['잔여 티켓',remaining,false],
+    ['진행 중 Task',inProgress,false],
+    ['지연 Task',overdue,false],
+    ['7일 내 마감',dueSoon,false],
+    ['진행률 미입력',noProgress,false]
+  ];
+  document.getElementById('taskStats').innerHTML=stats.map(s=>'<div class="tsBox'+(s[2]?' active':'')+'"><div class="tsLabel">'+esc(s[0])+'</div><div class="tsNum">'+s[1]+'</div></div>').join('');
+
+  const cardView=document.getElementById('taskCardView');
+  const listView=document.getElementById('taskListRows');
+  cardView.innerHTML = rows.length? rows.map(t=>{
     const ux=memberById(t.uxAssignee);
     const dz=(t.designAssignees||[]).map(id=>memberById(id)).filter(Boolean).map(m=>m.name).join(', ');
-    return '<tr><td><span class="tCode">'+esc(t.code)+'</span></td>'
-      +'<td><span class="tCat">'+esc(t.category||'-')+'</span></td>'
-      +'<td class="tTitle">'+esc(t.title)+'</td>'
-      +'<td>'+(ux?'UX '+esc(ux.name):'')+(dz?(ux?' · ':'')+'Design '+esc(dz):'')+'</td>'
-      +'<td>'+(t.ticket?esc(t.ticket):'-')+'</td>'
-      +'<td style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;">'+t.start+' ~ '+t.end+'</td>'
-      +'<td><div class="miniProg"><div class="progBar"><i style="width:'+t.progress+'%"></i></div><span class="progNum">'+t.progress+'%</span></div></td>'
-      +'<td><span class="tStatus '+(t.status==='closed'?'closed':'ongoing')+'">'+(t.status==='closed'?'종료됨':'진행중')+'</span></td>'
-      +'<td class="rowActions"><button data-edit="'+t.id+'" title="수정">✎</button><button data-del="'+t.id+'" title="삭제">🗑</button></td></tr>';
-  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text-faint);padding:24px;">과제가 없습니다.</td></tr>';
-  document.getElementById('taskTbody').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openTaskForm(taskById(b.dataset.edit))));
-  document.getElementById('taskTbody').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{
+    const units=taskUnitsOf(t);
+    const closed=t.status==='closed';
+    const body = units.length ? (
+      '<div class="tcProgRow"><div class="progBar"><i style="width:'+t.progress+'%"></i></div><span class="progNum">'+t.progress+'%</span></div>'
+      +'<div class="tcSubList">'+units.map((u,i)=>{
+        const checked=u.progress>=100;
+        return '<div class="tcSub"><div class="tcSubTop"><span class="tcSubCheck'+(checked?' checked':'')+'">'+(checked?'✓':'')+'</span><span class="tcSubIdx">'+String(i+1).padStart(2,'0')+'</span><span class="tcSubTitle">'+esc(u.title||'')+'</span></div><div class="progBar"><i style="width:'+u.progress+'%"></i></div><span class="progNum">'+u.progress+'%</span></div>';
+      }).join('')+'</div>'
+    ) : '<div class="tcEmpty">하위 Task가 없습니다.</div>';
+    return '<div class="taskCard'+(closed?' isClosed':'')+'">'
+      +'<div class="tcHead"><span class="tCode">'+esc(t.code)+'</span><span class="tcTitle">'+esc(t.title)+'</span>'
+      +(closed?'<span class="tStatus closed">종료</span>':'')
+      +(t.category?'<span class="tCat">'+esc(t.category)+'</span>':'')
+      +(t.ticket?'<span class="ticketNo">'+esc(t.ticket)+'</span>':'')
+      +'<span class="tlDate">'+esc(t.start)+' ~ '+esc(t.end)+'</span>'
+      +'<span class="tcActions"><button data-edit="'+t.id+'" title="수정">✎</button><button data-del="'+t.id+'" title="삭제">🗑</button></span>'
+      +'</div>'
+      +'<div class="tcAssignees">UX '+(ux?esc(ux.name):'미정')+'&nbsp;&nbsp;Design '+(dz?esc(dz):'미정')+'</div>'
+      +body
+      +'</div>';
+  }).join('') : '<div class="scrumEmpty">과제가 없습니다.</div>';
+
+  listView.innerHTML = rows.length? rows.map(t=>{
+    const ux=memberById(t.uxAssignee);
+    const dz=(t.designAssignees||[]).map(id=>memberById(id)).filter(Boolean).map(m=>m.name).join(', ');
+    const units=taskUnitsOf(t);
+    const closed=t.status==='closed';
+    const progText = (units.length || (t.progress||0)>0) ? '진행률 '+t.progress+'%' : '진행률 미입력';
+    return '<div class="tlRow'+(closed?' isClosed':'')+'">'
+      +'<div class="tlLeft">'
+        +'<div class="tlTitleLine"><span class="tCode">'+esc(t.code)+'</span><span>'+esc(t.title)+'</span>'+(closed?'<span class="tStatus closed">종료</span>':'')+'</div>'
+        +'<div class="tlMetaLine">'
+          +(t.category?'<span class="tCat">'+esc(t.category)+'</span>':'')
+          +(t.ticket?'<span class="ticketNo">'+esc(t.ticket)+'</span>':'')
+          +'<span>'+esc(t.start)+' ~ '+esc(t.end)+'</span>'
+          +'<span>UX '+(ux?esc(ux.name):'미정')+' &nbsp;Design '+(dz?esc(dz):'미정')+'</span>'
+        +'</div>'
+      +'</div>'
+      +'<div class="tlRight"><b>Task '+units.length+'개</b><span>'+progText+'</span><span class="tlActions"><button data-edit="'+t.id+'" title="수정">✎</button><button data-del="'+t.id+'" title="삭제">🗑</button></span></div>'
+      +'</div>';
+  }).join('') : '<div class="scrumEmpty">과제가 없습니다.</div>';
+
+  document.querySelectorAll('#taskCardView [data-edit], #taskListRows [data-edit]').forEach(b=>b.addEventListener('click',()=>openTaskForm(taskById(b.dataset.edit))));
+  document.querySelectorAll('#taskCardView [data-del], #taskListRows [data-del]').forEach(b=>b.addEventListener('click',()=>{
     if(confirm('이 과제를 삭제할까요?')) store.tasks.remove(b.dataset.del).then(()=>toast('과제를 삭제했습니다.'));
   }));
 }
