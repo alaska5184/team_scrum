@@ -757,8 +757,14 @@ let dayWidth=64;
 function visibleMemberIds(){return S.memberFilter==='all'?S.members.map(m=>m.id):[S.memberFilter];}
 
 function computeDayWidth(){
-  /* 고정 폭: 열 너비를 컨테이너에 맞춰 줄이지 않고, 영역 전체를 가로 스크롤로 볼 수 있게 합니다. */
-  dayWidth=92;
+  if(S.zoom==='week'){
+    /* 1주 보기: 스크롤 없이 컨테이너 너비에 꽉 차게 가변 확장 */
+    const viewport=document.getElementById('tlScroll').clientWidth||360;
+    dayWidth=clamp(Math.floor(viewport/7),80,220);
+  } else {
+    /* 2주 보기: 고정 폭 - 컨테이너보다 넓어지면 가로 스크롤 */
+    dayWidth=92;
+  }
 }
 
 function renderTimeline(){
