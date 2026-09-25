@@ -319,6 +319,15 @@ table.tasks tr:hover td{background:var(--surface-2);}
 .taskCard .tcSub .tcTodoRow .prio.p1{background:var(--danger-soft);color:var(--p1);}
 .taskCard .tcSub .tcTodoRow .prio.p2{background:var(--warning-soft);color:var(--p2);}
 .taskCard .tcSub .tcTodoRow .prio.p3{background:var(--surface-2);color:var(--p3);}
+.viewToggleRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px;border-bottom:1px solid var(--border);}
+.viewToggleRow:last-child{border-bottom:none;}
+.viewToggleRow .vtInfo{flex:1;min-width:0;}
+.viewToggleRow .vtTitle{font-size:13px;font-weight:600;color:var(--text);}
+.viewToggleRow .vtDesc{font-size:11.5px;color:var(--text-faint);margin-top:2px;line-height:1.5;}
+.swBtn{flex:none;width:38px;height:22px;border-radius:11px;border:none;background:var(--border-strong);position:relative;cursor:pointer;padding:0;transition:background .15s;}
+.swBtn.on{background:var(--accent);}
+.swBtn i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.swBtn.on i{left:18px;}
 .taskListRows{padding:0 16px 24px;}
 .tlRow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 4px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
 .tlRow:last-child{border-bottom:none;}
@@ -589,7 +598,9 @@ const S={
   auth:null,fsdb:null,me:null,pendingUid:null,tab:'schedule',density:'full',zoom:'week',
   members:[],tasks:[],vacations:[],externals:[],holidays:[],scrum:[],
   memberFilter:'all',scrumDate:fmt(TODAY),
-  windowStart:addDays(TODAY,-centerOffset(7))
+  windowStart:addDays(TODAY,-centerOffset(7)),
+  showWeekend:localStorage.getItem('viewShowWeekend')!=='0',
+  showClosedTickets:localStorage.getItem('viewShowClosedTickets')!=='0'
 };
 let store={};
 
@@ -829,7 +840,18 @@ function renderTimeline(){
   const nDays=viewLength();
   const winStart=S.windowStart;
   const winEnd=addDays(winStart,nDays-1);
-  const width=nDays*dayWidth;
+  function isHiddenWeekend(dayIdx){
+    if(S.showWeekend!==false) return false;
+    const dd=addDays(winStart,dayIdx);
+    return (dd.getDay()===0||dd.getDay()===6);
+  }
+  function dayOffsetPx(dayIdx){
+    let px=0;
+    for(let k=0;k<dayIdx;k++){ if(!isHiddenWeekend(k)) px+=dayWidth; }
+    return px;
+  }
+  function spanWidthPx(startIdx,endIdx){ return dayOffsetPx(endIdx+1)-dayOffsetPx(startIdx); }
+  const width=dayOffsetPx(nDays);
   const filterIds=new Set(visibleMemberIds());
   document.getElementById('rangeLabel').textContent=kDate(winStart)+' – '+kDate(winEnd);
 
@@ -849,6 +871,7 @@ function renderTimeline(){
   const taskItems=[];
   if(S.density==='full'){
     S.tasks.forEach(t=>{
+      if(t.status==='closed' && S.showClosedTickets===false) return;
       const assignees=[t.uxAssignee,...(t.designAssignees||[])].filter(Boolean);
       if(assignees.length && !assignees.some(id=>filterIds.has(id))) return;
       const c=clipToWindow(t.start,t.end); if(c) taskItems.push({c,data:t});
@@ -862,6 +885,7 @@ function renderTimeline(){
     const ds=fmt(d);
     const hol=holidayOn(ds);
     const isWknd=(d.getDay()===0||d.getDay()===6);
+    if(isHiddenWeekend(i)) continue;
     const isToday=dayDiff(TODAY,d)===0;
     html+='<div class="tlDayHead'+(isWknd?' weekend':'')+(hol?' holiday':'')+(isToday?' today':'')+'" data-date="'+ds+'" style="width:'+dayWidth+'px">'
       +'<span class="dow">'+DOW[d.getDay()]+'</span><span class="dnum">'+(isToday?'<span class="dnumBadge">'+d.getDate()+'</span>':d.getDate())+'</span>'
@@ -876,11 +900,12 @@ function renderTimeline(){
     const ds=fmt(d);
     const hol=holidayOn(ds);
     const isWknd=(d.getDay()===0||d.getDay()===6);
-    if(hol||isWknd) html+='<div class="tlBg '+(hol?'holiday':'weekend')+'" style="left:'+(i*dayWidth)+'px;width:'+dayWidth+'px;"></div>';
+    if(isHiddenWeekend(i)) continue;
+    if(hol||isWknd) html+='<div class="tlBg '+(hol?'holiday':'weekend')+'" style="left:'+dayOffsetPx(i)+'px;width:'+dayWidth+'px;"></div>';
   }
   if(TODAY>=winStart && TODAY<=winEnd){
     const todayIdx=dayDiff(winStart,TODAY);
-    html+='<div class="tlToday" style="left:'+(todayIdx*dayWidth)+'px;"></div>';
+    if(!isHiddenWeekend(todayIdx)) html+='<div class="tlToday" style="left:'+dayOffsetPx(todayIdx)+'px;"></div>';
   }
 
   let rowH=54, gap=6;
@@ -888,8 +913,9 @@ function renderTimeline(){
   const taskTop=vacTop+vacH+14;
   if(fixedItems.length){
     fixedItems.forEach(it=>{
-      const left=dayDiff(winStart,it.c.cs)*dayWidth+2;
-      const w=Math.max(dayWidth-4,(dayDiff(it.c.cs,it.c.ce)+1)*dayWidth-4);
+      const _si=dayDiff(winStart,it.c.cs), _ei=dayDiff(winStart,it.c.ce);
+      const left=dayOffsetPx(_si)+2;
+      const w=Math.max(dayWidth-4,spanWidthPx(_si,_ei)-4);
       html+='<div class="bar '+it.type+'" data-kind="'+it.type+'" data-id="'+it.data.id+'" style="left:'+left+'px;top:'+vacTop+'px;height:'+vacH+'px;width:'+w+'px;border-color:'+it.color+';color:'+it.color+';">'+it.label+'</div>';
     });
   }
@@ -901,8 +927,9 @@ function renderTimeline(){
       taskRows=taskItems.length;
       taskItems.forEach((it,idx)=>{
         const t=it.data;
-        const left=dayDiff(winStart,it.c.cs)*dayWidth+2;
-        const w=Math.max(dayWidth-4,(dayDiff(it.c.cs,it.c.ce)+1)*dayWidth-4);
+        const _si2=dayDiff(winStart,it.c.cs), _ei2=dayDiff(winStart,it.c.ce);
+        const left=dayOffsetPx(_si2)+2;
+        const w=Math.max(dayWidth-4,spanWidthPx(_si2,_ei2)-4);
         const top=taskTop+idx*(rowH+gap);
         const catTag=t.category?'<span class="tlBarCat">'+esc(t.category)+'</span>':'';
         const uxTxt=esc((memberById(t.uxAssignee)||{}).name||'미정');
@@ -1026,7 +1053,9 @@ function renderTasks(){
   const filterIds=new Set(visibleMemberIds());
   const rows=S.tasks.filter(t=>{
     const assignees=[t.uxAssignee,...(t.designAssignees||[])].filter(Boolean);
-    return assignees.length===0 || assignees.some(id=>filterIds.has(id));
+    const assigneeOk = assignees.length===0 || assignees.some(id=>filterIds.has(id));
+    const closedOk = S.showClosedTickets!==false || t.status!=='closed';
+    return assigneeOk && closedOk;
   }).slice().sort((a,b)=>parse(b.start)-parse(a.start));
   document.getElementById('taskCnt').textContent=rows.length+'건';
 
@@ -1433,6 +1462,10 @@ function openAdmin(){
   if(!isAdmin())return;
   let tab='members';
   function body(){
+    if(tab==='view'){
+      return '<div class="viewToggleRow"><div class="vtInfo"><div class="vtTitle">주말 보기</div><div class="vtDesc">타임라인·달력에 토·일요일을 표시할지 정합니다.</div></div><button type="button" class="swBtn'+(S.showWeekend!==false?' on':'')+'" data-vt="weekend"><i></i></button></div>'
+        +'<div class="viewToggleRow"><div class="vtInfo"><div class="vtTitle">종료된 티켓 보기</div><div class="vtDesc">완료 처리된(종료) 티켓을 타임라인·과제 탭에 회색으로 계속 보여줄지 정합니다.</div></div><button type="button" class="swBtn'+(S.showClosedTickets!==false?' on':'')+'" data-vt="closed"><i></i></button></div>';
+    }
     if(tab==='members'){
       return S.members.map(m=>'<div class="adminRow"><span class="avatar" style="background:'+colorFor(m.id)+'">'+initials(m.name)+'</span>'
         +'<div class="info"><div class="n">'+esc(m.name)+' <span style="color:var(--text-faint);font-weight:400;">'+(m.role==='admin'?'· 관리자':'· 편집자')+'</span></div><div class="m">'+esc(m.email)+' · '+(m.team||'-')+'</div></div>'
@@ -1445,6 +1478,16 @@ function openAdmin(){
   }
   function wire(root){
     root.querySelectorAll('[data-tabb]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tabb;paint(root);}));
+    if(tab==='view'){
+      root.querySelectorAll('[data-vt]').forEach(b=>b.addEventListener('click',()=>{
+        const key=b.dataset.vt;
+        if(key==='weekend'){ S.showWeekend=!(S.showWeekend!==false); localStorage.setItem('viewShowWeekend',S.showWeekend?'1':'0'); }
+        else { S.showClosedTickets=!(S.showClosedTickets!==false); localStorage.setItem('viewShowClosedTickets',S.showClosedTickets?'1':'0'); }
+        renderTimeline(); renderScrum(); renderTasks();
+        paint(root);
+      }));
+      return;
+    }
     if(tab==='members'){
       root.querySelectorAll('[data-medit]').forEach(b=>b.addEventListener('click',()=>openMemberForm(memberById(b.dataset.medit))));
       root.querySelectorAll('[data-mdel]').forEach(b=>b.addEventListener('click',()=>{ if(confirm('목록에서 제거할까요? (로그인 계정 자체는 남아 있고, 다시 로그인하면 편집자로 자동 등록돼요)')) store.members.remove(b.dataset.mdel).then(()=>{toast('제거했습니다.');paint(root);}); }));
@@ -1460,7 +1503,7 @@ function openAdmin(){
     wire(root);
   }
   openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>관리</h3><p class="desc">구성원과 공휴일을 관리합니다.</p>'
-    +'<div class="adminTabs" style="padding:0 0 10px;"><button data-tabb="members" class="active">구성원</button><button data-tabb="holidays">공휴일</button></div>'
+    +'<div class="adminTabs" style="padding:0 0 10px;"><button data-tabb="members" class="active">구성원</button><button data-tabb="holidays">공휴일</button><button data-tabb="view">보기</button></div>'
     +'<div id="adminBody"></div>', root=>{ window.__closeModal=closeModal; paint(root); });
 }
 function openMemberForm(m){
