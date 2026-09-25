@@ -473,6 +473,7 @@ footer.foot{padding:16px;text-align:center;font-size:11px;color:var(--text-faint
     <section id="taskView" hidden>
       <div class="taskToolbar">
         <h2>과제 목록</h2><span class="cnt" id="taskCnt" style="color:var(--text-muted);font-size:12px;"></span>
+        <select class="selectPill" id="cycleFilter" style="margin-left:8px;"><option value="all">전체 사이클</option></select>
         <div class="viewToggle" id="taskViewToggle">
           <button type="button" class="vtBtn active" data-view="card">카드보기</button>
           <button type="button" class="vtBtn" data-view="list">목록보기</button>
@@ -554,6 +555,8 @@ const SEED_TASKS=[];
 const SEED_VACATIONS=[];
 const SEED_EXTERNAL=[];
 const SEED_SCRUM=[];
+const SEED_CHANNELS=[];
+const SEED_CYCLES=[];
 const TODAY=startOfDay(new Date());
 function iso(offset){return fmt(addDays(TODAY,offset));}
 /* 공휴일만 2026년 기준으로 미리 채워둡니다. 관리 화면에서 언제든 수정할 수 있어요. */
@@ -612,7 +615,8 @@ const S={
   memberFilter:'all',scrumDate:fmt(TODAY),
   windowStart:addDays(TODAY,-centerOffset(7)),
   showWeekend:localStorage.getItem('viewShowWeekend')!=='0',
-  showClosedTickets:localStorage.getItem('viewShowClosedTickets')!=='0'
+  showClosedTickets:localStorage.getItem('viewShowClosedTickets')!=='0',
+  channels:[],cycles:[],taskCycleFilter:'all'
 };
 let store={};
 
@@ -636,6 +640,8 @@ async function init(){
   store.externals=makeCollection(SEED_EXTERNAL, fsdb.collection('externalWorks'));
   store.holidays=makeCollection(SEED_HOLIDAYS, fsdb.collection('holidays'));
   store.scrum=makeCollection(SEED_SCRUM, fsdb.collection('scrum'));
+  store.channels=makeCollection(SEED_CHANNELS, fsdb.collection('channels'));
+  store.cycles=makeCollection(SEED_CYCLES, fsdb.collection('cycles'));
 
   store.members.subscribe(v=>{S.members=v.slice().sort((a,b)=>(a.order||0)-(b.order||0));onDataChange();});
   store.tasks.subscribe(v=>{S.tasks=v;onDataChange();});
@@ -643,6 +649,8 @@ async function init(){
   store.externals.subscribe(v=>{S.externals=v;onDataChange();});
   store.holidays.subscribe(v=>{S.holidays=v;onDataChange();});
   store.scrum.subscribe(v=>{S.scrum=v;onDataChange();});
+  store.channels.subscribe(v=>{S.channels=v.slice().sort((a,b)=>(a.name||'').localeCompare(b.name||''));onDataChange();});
+  store.cycles.subscribe(v=>{S.cycles=v.slice().sort((a,b)=>(a.start||'').localeCompare(b.start||''));onDataChange();});
 
   wireLogin();
   wireApp();
@@ -683,6 +691,7 @@ function onDataChange(){
     return;
   }
   populateMemberFilter();
+  populateCycleFilter();
   renderTimeline();
   renderScrum();
   renderTasks();
@@ -791,6 +800,7 @@ function wireApp(){
     document.getElementById('taskCardView').hidden = taskViewMode!=='card';
     document.getElementById('taskListRows').hidden = taskViewMode!=='list';
   });
+  document.getElementById('cycleFilter').addEventListener('change',e=>{ S.taskCycleFilter=e.target.value; renderTasks(); });
   document.getElementById('memberFilter').addEventListener('change',e=>{S.memberFilter=e.target.value;renderTimeline();renderScrum();renderTasks();});
   document.getElementById('densityTabs').addEventListener('click',e=>{
     const b=e.target.closest('button[data-d]'); if(!b)return;
@@ -817,6 +827,14 @@ function wireApp(){
 function throttle(fn,ms){let t=0;return(...a)=>{const now=Date.now();if(now-t>ms){t=now;fn(...a);}};}
 function debounce(fn,ms){let h;return(...a)=>{clearTimeout(h);h=setTimeout(()=>fn(...a),ms);};}
 
+function populateCycleFilter(){
+  const sel=document.getElementById('cycleFilter');
+  if(!sel) return;
+  const cur=sel.value||'all';
+  const opts=S.cycles.filter(c=>c.status!=='closed').map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join('');
+  sel.innerHTML='<option value="all">전체 사이클</option><option value="none">운영 사이클 없음</option>'+opts;
+  if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
+}
 function populateMemberFilter(){
   const sel=document.getElementById('memberFilter');
   const cur=sel.value||'all';
@@ -1075,7 +1093,8 @@ function renderTasks(){
     const assignees=[t.uxAssignee,...(t.designAssignees||[])].filter(Boolean);
     const assigneeOk = assignees.length===0 || assignees.some(id=>filterIds.has(id));
     const closedOk = S.showClosedTickets!==false || t.status!=='closed';
-    return assigneeOk && closedOk;
+    const cycleOk = S.taskCycleFilter==='all' || (S.taskCycleFilter==='none' ? !t.cycleId : t.cycleId===S.taskCycleFilter);
+    return assigneeOk && closedOk && cycleOk;
   }).slice().sort((a,b)=>parse(b.start)-parse(a.start));
   document.getElementById('taskCnt').textContent=rows.length+'건';
 
@@ -1139,6 +1158,7 @@ function renderTasks(){
     return '<div class="taskCard'+(closed?' isClosed':'')+'">'
       +'<div class="tcHead"><span class="tCode">'+esc(t.code)+'</span><span class="tcTitle">'+esc(t.title)+'</span>'
       +(closed?'<span class="tStatus closed">종료</span>':'')
+      +(t.channelId?'<span class="tCat">'+esc((S.channels.find(c=>c.id===t.channelId)||{}).name||'')+'</span>':'')
       +(t.category?'<span class="tCat">'+esc(t.category)+'</span>':'')
       +(t.ticket?'<span class="ticketNo">'+esc(t.ticket)+'</span>':'')
       +'<span class="tlDate">'+esc(t.start)+' ~ '+esc(t.end)+'</span>'
@@ -1212,8 +1232,10 @@ function openNewChooser(){
 /* -------- task form -------- */
 function openTaskForm(task){
   const isEdit=!!task;
-  task=task||{id:null,code:'',category:'',title:'',uxAssignee:'',designAssignees:[],ticket:'',start:fmt(TODAY),end:fmt(TODAY),progress:0,status:'ongoing',subtasks:[]};
+  task=task||{id:null,code:'',category:'',title:'',uxAssignee:'',designAssignees:[],ticket:'',channelId:'',cycleId:'',start:fmt(TODAY),end:fmt(TODAY),progress:0,status:'ongoing',subtasks:[]};
   const memberOpts=S.members.map(m=>'<option value="'+m.id+'" '+(task.uxAssignee===m.id?'selected':'')+'>'+esc(m.name)+'</option>').join('');
+  const channelOpts=S.channels.map(c=>'<option value="'+c.id+'" '+(task.channelId===c.id?'selected':'')+'>'+esc(c.name)+'</option>').join('');
+  const cycleOpts=S.cycles.filter(c=>c.status!=='closed'||c.id===task.cycleId).map(c=>'<option value="'+c.id+'" '+(task.cycleId===c.id?'selected':'')+'>'+esc(c.name)+'</option>').join('');
   openModal(
     '<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button>'
     +'<h3>'+(isEdit?'과제 수정':'새 과제')+'</h3><p class="desc">일정 타임라인과 과제 목록에 함께 표시됩니다.</p>'
@@ -1221,6 +1243,8 @@ function openTaskForm(task){
     +field('코드','code',task.code,'text','예: T101')
     +field('구분','category',task.category,'text','예: 다이렉트')
     +'<div class="field2 full"><label>과제명</label><input name="title" value="'+esc(task.title)+'" required></div>'
+    +'<div class="field2"><label>채널</label><select name="channelId"><option value="">미지정</option>'+channelOpts+'</select></div>'
+    +'<div class="field2"><label>사이클</label><select name="cycleId"><option value="">운영 사이클 없음</option>'+cycleOpts+'</select></div>'
     +'<div class="field2"><label>UX 담당</label><select name="uxAssignee"><option value="">미정</option>'+memberOpts+'</select></div>'
     +field('티켓 번호','ticket',task.ticket,'text','예: #12345')
     +field('시작일','start',task.start,'date')
@@ -1237,7 +1261,7 @@ function openTaskForm(task){
       root.querySelector('#taskForm').addEventListener('submit',async e=>{
         e.preventDefault();
         const f=new FormData(e.target);
-        const data={code:f.get('code')||'',category:f.get('category')||'',title:f.get('title'),uxAssignee:f.get('uxAssignee')||'',designAssignees:task.designAssignees||[],ticket:f.get('ticket')||'',start:f.get('start'),end:f.get('end'),progress:clamp(Number(f.get('progress'))||0,0,100),status:f.get('status'),subtasks:task.subtasks||[]};
+        const data={code:f.get('code')||'',category:f.get('category')||'',title:f.get('title'),channelId:f.get('channelId')||'',cycleId:f.get('cycleId')||'',uxAssignee:f.get('uxAssignee')||'',designAssignees:task.designAssignees||[],ticket:f.get('ticket')||'',start:f.get('start'),end:f.get('end'),progress:clamp(Number(f.get('progress'))||0,0,100),status:f.get('status'),subtasks:task.subtasks||[]};
         if(isEdit) await store.tasks.update(task.id,data); else await store.tasks.add(data);
         toast('저장했습니다.'); closeModal();
       });
@@ -1562,6 +1586,17 @@ function openAdmin(){
   if(!isAdmin())return;
   let tab='members';
   function body(){
+    if(tab==='channels'){
+      return S.channels.map(c=>'<div class="adminRow"><div class="info"><div class="n">'+esc(c.name)+'</div></div>'
+        +'<div class="rowActions"><button data-cedit="'+c.id+'">'+icon('pencil')+'</button><button data-cdel="'+c.id+'">'+icon('trash')+'</button></div></div>').join('')
+        +'<button class="iconBtn solid" id="addChannel" style="margin-top:6px;">+ 채널 추가</button>';
+    }
+    if(tab==='cycles'){
+      const statusLabel={planned:'예정',active:'진행중',closed:'종료'};
+      return S.cycles.map(cy=>'<div class="adminRow"><div class="info"><div class="n">'+esc(cy.name)+' <span style="color:var(--text-faint);font-weight:400;">· '+(statusLabel[cy.status]||'예정')+'</span></div><div class="m">'+(cy.start||'')+' ~ '+(cy.end||'')+'</div></div>'
+        +'<div class="rowActions"><button data-cyedit="'+cy.id+'">'+icon('pencil')+'</button><button data-cydel="'+cy.id+'">'+icon('trash')+'</button></div></div>').join('')
+        +'<button class="iconBtn solid" id="addCycle" style="margin-top:6px;">+ 사이클 추가</button>';
+    }
     if(tab==='view'){
       return '<div class="viewToggleRow"><div class="vtInfo"><div class="vtTitle">주말 보기</div><div class="vtDesc">타임라인·달력에 토·일요일을 표시할지 정합니다.</div></div><button type="button" class="swBtn'+(S.showWeekend!==false?' on':'')+'" data-vt="weekend"><i></i></button></div>'
         +'<div class="viewToggleRow"><div class="vtInfo"><div class="vtTitle">종료된 티켓 보기</div><div class="vtDesc">완료 처리된(종료) 티켓을 타임라인·과제 탭에 회색으로 계속 보여줄지 정합니다.</div></div><button type="button" class="swBtn'+(S.showClosedTickets!==false?' on':'')+'" data-vt="closed"><i></i></button></div>';
@@ -1578,6 +1613,18 @@ function openAdmin(){
   }
   function wire(root){
     root.querySelectorAll('[data-tabb]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tabb;paint(root);}));
+    if(tab==='channels'){
+      root.querySelectorAll('[data-cedit]').forEach(b=>b.addEventListener('click',()=>openChannelForm(S.channels.find(c=>c.id===b.dataset.cedit))));
+      root.querySelectorAll('[data-cdel]').forEach(b=>b.addEventListener('click',()=>{ if(confirm('삭제할까요? 이 채널을 사용 중인 과제의 채널 지정은 해제됩니다.')) store.channels.remove(b.dataset.cdel).then(()=>{toast('삭제했습니다.');paint(root);}); }));
+      root.querySelector('#addChannel')&&root.querySelector('#addChannel').addEventListener('click',()=>openChannelForm(null));
+      return;
+    }
+    if(tab==='cycles'){
+      root.querySelectorAll('[data-cyedit]').forEach(b=>b.addEventListener('click',()=>openCycleForm(S.cycles.find(c=>c.id===b.dataset.cyedit))));
+      root.querySelectorAll('[data-cydel]').forEach(b=>b.addEventListener('click',()=>{ if(confirm('삭제할까요? 이 사이클을 사용 중인 과제의 사이클 지정은 해제됩니다.')) store.cycles.remove(b.dataset.cydel).then(()=>{toast('삭제했습니다.');paint(root);}); }));
+      root.querySelector('#addCycle')&&root.querySelector('#addCycle').addEventListener('click',()=>openCycleForm(null));
+      return;
+    }
     if(tab==='view'){
       root.querySelectorAll('[data-vt]').forEach(b=>b.addEventListener('click',()=>{
         const key=b.dataset.vt;
@@ -1603,7 +1650,7 @@ function openAdmin(){
     wire(root);
   }
   openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>관리</h3><p class="desc">구성원과 공휴일을 관리합니다.</p>'
-    +'<div class="adminTabs" style="padding:0 0 10px;"><button data-tabb="members" class="active">구성원</button><button data-tabb="holidays">공휴일</button><button data-tabb="view">보기</button></div>'
+    +'<div class="adminTabs" style="padding:0 0 10px;"><button data-tabb="members" class="active">구성원</button><button data-tabb="holidays">공휴일</button><button data-tabb="channels">채널</button><button data-tabb="cycles">사이클</button><button data-tabb="view">보기</button></div>'
     +'<div id="adminBody"></div>', root=>{ window.__closeModal=closeModal; paint(root); });
 }
 function openMemberForm(m){
@@ -1639,6 +1686,43 @@ function openHolidayForm(h){
         e.preventDefault(); const f=new FormData(e.target);
         const data={date:f.get('date'),name:f.get('name')};
         if(isEdit) await store.holidays.update(h.id,data); else await store.holidays.add(data);
+        toast('저장했습니다.'); closeModal(); openAdmin();
+      });
+    });
+}
+function openChannelForm(ch){
+  const isEdit=!!ch;
+  ch=ch||{id:null,name:''};
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>'+(isEdit?'채널 수정':'채널 추가')+'</h3>'
+    +'<form id="chForm"><div class="formGrid">'+field('채널명','name',ch.name,'text','예: 자동차, 매직카')+'</div>'
+    +'<div class="modalActions">'+(isEdit?'<button type="button" class="btnDanger" id="chDel">삭제</button>':'')+'<button type="button" class="btnGhost" onclick="window.__closeModal()">취소</button><button class="btnPrimary" style="width:auto;">저장</button></div></form>',
+    root=>{ window.__closeModal=closeModal;
+      root.querySelector('#chDel')&&root.querySelector('#chDel').addEventListener('click',()=>{ if(confirm('삭제할까요? 이 채널을 사용 중인 과제의 채널 지정은 해제됩니다.')) store.channels.remove(ch.id).then(()=>{toast('삭제했습니다.');closeModal();openAdmin();}); });
+      root.querySelector('#chForm').addEventListener('submit',async e=>{
+        e.preventDefault(); const f=new FormData(e.target);
+        const data={name:f.get('name')||''};
+        if(isEdit) await store.channels.update(ch.id,data); else await store.channels.add(data);
+        toast('저장했습니다.'); closeModal(); openAdmin();
+      });
+    });
+}
+function openCycleForm(cy){
+  const isEdit=!!cy;
+  cy=cy||{id:null,name:'',start:fmt(TODAY),end:fmt(TODAY),status:'planned'};
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>'+(isEdit?'사이클 수정':'사이클 추가')+'</h3>'
+    +'<form id="cyForm"><div class="formGrid">'
+    +'<div class="field2 full"><label>사이클명</label><input name="name" value="'+esc(cy.name)+'" required></div>'
+    +field('시작일','start',cy.start,'date')
+    +field('종료일','end',cy.end,'date')
+    +'<div class="field2"><label>상태</label><select name="status"><option value="planned" '+(cy.status==='planned'?'selected':'')+'>예정</option><option value="active" '+(cy.status==='active'?'selected':'')+'>진행중</option><option value="closed" '+(cy.status==='closed'?'selected':'')+'>종료</option></select></div>'
+    +'</div>'
+    +'<div class="modalActions">'+(isEdit?'<button type="button" class="btnDanger" id="cyDel">삭제</button>':'')+'<button type="button" class="btnGhost" onclick="window.__closeModal()">취소</button><button class="btnPrimary" style="width:auto;">저장</button></div></form>',
+    root=>{ window.__closeModal=closeModal;
+      root.querySelector('#cyDel')&&root.querySelector('#cyDel').addEventListener('click',()=>{ if(confirm('삭제할까요? 이 사이클을 사용 중인 과제의 사이클 지정은 해제됩니다.')) store.cycles.remove(cy.id).then(()=>{toast('삭제했습니다.');closeModal();openAdmin();}); });
+      root.querySelector('#cyForm').addEventListener('submit',async e=>{
+        e.preventDefault(); const f=new FormData(e.target);
+        const data={name:f.get('name')||'',start:f.get('start')||'',end:f.get('end')||'',status:f.get('status')||'planned'};
+        if(isEdit) await store.cycles.update(cy.id,data); else await store.cycles.add(data);
         toast('저장했습니다.'); closeModal(); openAdmin();
       });
     });
