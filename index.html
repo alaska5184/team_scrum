@@ -310,6 +310,15 @@ table.tasks tr:hover td{background:var(--surface-2);}
 .taskCard .tcSub .tcSubTitle{flex:1;font-size:13px;font-weight:500;}
 .taskCard .tcSub .progBar{flex:1;}
 .taskCard .tcSub .progNum{margin-left:8px;}
+.taskCard .tcSub .tcTodoList{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);display:flex;flex-direction:column;gap:5px;}
+.taskCard .tcSub .tcTodoRow{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);}
+.taskCard .tcSub .tcTodoRow .tcTodoArrow{flex:none;color:var(--text-faint);}
+.taskCard .tcSub .tcTodoRow .tcTodoTitle{flex:1;}
+.taskCard .tcSub .tcTodoRow .tcTodoProg{flex:none;font-family:var(--font-mono);font-size:11px;}
+.taskCard .tcSub .tcTodoRow .prio{font-size:9.5px;font-weight:600;border-radius:4px;padding:0 4px;flex:none;}
+.taskCard .tcSub .tcTodoRow .prio.p1{background:var(--danger-soft);color:var(--p1);}
+.taskCard .tcSub .tcTodoRow .prio.p2{background:var(--warning-soft);color:var(--p2);}
+.taskCard .tcSub .tcTodoRow .prio.p3{background:var(--surface-2);color:var(--p3);}
 .taskListRows{padding:0 16px 24px;}
 .tlRow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 4px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
 .tlRow:last-child{border-bottom:none;}
@@ -1052,13 +1061,20 @@ function renderTasks(){
   cardView.innerHTML = rows.length? rows.map(t=>{
     const ux=memberById(t.uxAssignee);
     const dz=(t.designAssignees||[]).map(id=>memberById(id)).filter(Boolean).map(m=>m.name).join(', ');
-    const units=taskUnitsOf(t);
+    const tasks=taskTasksOf(t);
     const closed=t.status==='closed';
-    const body = units.length ? (
+    const body = tasks.length ? (
       '<div class="tcProgRow"><div class="progBar"><i style="width:'+t.progress+'%"></i></div><span class="progNum">'+t.progress+'%</span></div>'
-      +'<div class="tcSubList">'+units.map((u,i)=>{
-        const checked=u.progress>=100;
-        return '<div class="tcSub"><div class="tcSubTop"><span class="tcSubCheck'+(checked?' checked':'')+'">'+(checked?icon('check',10):'')+'</span><span class="tcSubIdx">'+String(i+1).padStart(2,'0')+'</span><span class="tcSubTitle">'+esc(u.title||'')+'</span></div><div class="progBar"><i style="width:'+u.progress+'%"></i></div><span class="progNum">'+u.progress+'%</span></div>';
+      +'<div class="tcSubList">'+tasks.map((tk,i)=>{
+        const tProg=taskItemProgress(tk);
+        const checked=tProg>=100;
+        const todos=tk.todos||[];
+        const single=todos.length===1 && todos[0].title===tk.title;
+        const todosHtml=(!single && todos.length)?('<div class="tcTodoList">'+todos.map(td=>{
+          const tdPrio=td.priority?'<span class="prio '+td.priority+'">'+({p1:'P1',p2:'P2',p3:'P3'}[td.priority]||'')+'</span>':'';
+          return '<div class="tcTodoRow"><span class="tcTodoArrow">└</span><span class="tcTodoTitle">'+esc(td.title)+'</span>'+tdPrio+'<span class="tcTodoProg">'+(td.progress||0)+'%</span></div>';
+        }).join('')+'</div>'):'';
+        return '<div class="tcSub"><div class="tcSubTop"><span class="tcSubCheck'+(checked?' checked':'')+'">'+(checked?icon('check',10):'')+'</span><span class="tcSubIdx">'+String(i+1).padStart(2,'0')+'</span><span class="tcSubTitle">'+esc(tk.title||'')+'</span></div><div class="progBar"><i style="width:'+tProg+'%"></i></div><span class="progNum">'+tProg+'%</span>'+todosHtml+'</div>';
       }).join('')+'</div>'
     ) : '<div class="tcEmpty">하위 Task가 없습니다.</div>';
     return '<div class="taskCard'+(closed?' isClosed':'')+'">'
