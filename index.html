@@ -875,7 +875,15 @@ function renderTimeline(){
   }
 
   let rowH=54, gap=6;
-  const taskTop=26;
+  const vacTop=10, vacH=28;
+  const taskTop=vacTop+vacH+14;
+  if(fixedItems.length){
+    fixedItems.forEach(it=>{
+      const left=dayDiff(winStart,it.c.cs)*dayWidth+2;
+      const w=Math.max(dayWidth-4,(dayDiff(it.c.cs,it.c.ce)+1)*dayWidth-4);
+      html+='<div class="bar '+it.type+'" data-kind="'+it.type+'" data-id="'+it.data.id+'" style="left:'+left+'px;top:'+vacTop+'px;height:'+vacH+'px;width:'+w+'px;border-color:'+it.color+';color:'+it.color+';">'+it.label+'</div>';
+    });
+  }
   let taskRows=1;
   if(S.density==='full'){
     if(taskItems.length===0){
