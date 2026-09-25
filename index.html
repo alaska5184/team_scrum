@@ -395,6 +395,25 @@ table.tasks tr:hover td{background:var(--surface-2);}
 .toast.show{opacity:1;}
 footer.foot{padding:16px;text-align:center;font-size:11px;color:var(--text-faint);}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+.calWrap{padding:0 0 20px;}
+.calHeadRow{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12px;color:var(--text-muted);padding:4px 0;}
+.calBody{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--border);border-left:1px solid var(--border);}
+.calCell{min-height:96px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px;box-sizing:border-box;background:var(--surface);}
+.calCell.outMonth{background:var(--surface-2);}
+.calCell.outMonth .calDnum{color:var(--text-faint);}
+.calCell.weekend{background:var(--weekend-bg);}
+.calCell.holiday{background:var(--holiday-bg);}
+.calCell.today{box-shadow:inset 0 0 0 2px var(--today-line);}
+.calCellHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:4px;}
+.calDnum{font-size:12px;font-weight:600;}
+.calDnum.todayBadge{background:var(--today-line);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;}
+.calHname{font-size:10px;color:var(--danger);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.calItems{display:flex;flex-direction:column;gap:2px;}
+.calChip{font-size:10.5px;padding:1px 4px;border-radius:4px;border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.calMore{font-size:10.5px;color:var(--text-muted);cursor:pointer;padding:1px 4px;}
+.dayDetailList{display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;}
+.dayDetailRow{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;}
+.dayDetailRow .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
 </style>
 </head>
 <body>
@@ -450,15 +469,18 @@ footer.foot{padding:16px;text-align:center;font-size:11px;color:var(--text-faint
           <div class="segTabs" id="densityTabs"><button data-d="summary">요약</button><button data-d="full" class="active">전체</button></div>
         </div>
         <div class="scheduleBarRow">
-          <div class="segTabs" id="zoomTabs"><button data-z="week" class="active">1주</button><button data-z="twoweek">2주</button></div>
+          <div class="segTabs" id="zoomTabs"><button data-z="week" class="active">1주</button><button data-z="twoweek">2주</button><button data-z="month">캘린더</button></div>
           <div class="spacer"></div>
           <div class="navBtns"><button id="prevBtn" title="이전 기간"><svg class="lucide-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button><button id="todayBtn" title="오늘">오늘</button><button id="nextBtn" title="다음 기간"><svg class="lucide-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div>
         </div>
       </div>
-      <div class="timelineWrap">
+      <div class="timelineWrap" id="tlWrap">
         <div class="timelineScroll" id="tlScroll">
           <div class="timelineInner" id="tlInner"></div>
         </div>
+      </div>
+      <div class="calWrap" id="calWrap" hidden>
+        <div class="calInner" id="calInner"></div>
       </div>
       <div class="scrumHead">
         <h2 id="scrumTitle">스크럼</h2>
@@ -514,6 +536,8 @@ function pad(n){return String(n).padStart(2,'0');}
 function fmt(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function parse(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
 function addDays(d,n){return new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);}
+function monthStart(d){return new Date(d.getFullYear(),d.getMonth(),1);}
+function addMonths(d,n){return new Date(d.getFullYear(),d.getMonth()+n,1);}
 function startOfDay(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
 function dayDiff(a,b){return Math.round((startOfDay(b)-startOfDay(a))/DAY);}
 const DOW=['일','월','화','수','목','금','토'];
@@ -616,7 +640,7 @@ const S={
   windowStart:addDays(TODAY,-centerOffset(7)),
   showWeekend:localStorage.getItem('viewShowWeekend')!=='0',
   showClosedTickets:localStorage.getItem('viewShowClosedTickets')!=='0',
-  channels:[],cycles:[],taskCycleFilter:'all'
+  channels:[],cycles:[],taskCycleFilter:'all',calMonth:monthStart(TODAY)
 };
 let store={};
 
@@ -812,13 +836,14 @@ function wireApp(){
     const b=e.target.closest('button[data-z]'); if(!b)return;
     const oldCenter=addDays(S.windowStart,centerOffset(viewLength()));
     S.zoom=b.dataset.z;
-    S.windowStart=addDays(oldCenter,-centerOffset(viewLength()));
+    if(S.zoom==='month'){ S.calMonth=monthStart(oldCenter); }
+    else { S.windowStart=addDays(oldCenter,-centerOffset(viewLength())); }
     document.querySelectorAll('#zoomTabs button').forEach(x=>x.classList.toggle('active',x===b));
     renderTimeline();
   });
-  document.getElementById('prevBtn').addEventListener('click',()=>{S.windowStart=addDays(S.windowStart,-viewLength());renderTimeline();});
-  document.getElementById('nextBtn').addEventListener('click',()=>{S.windowStart=addDays(S.windowStart,viewLength());renderTimeline();});
-  document.getElementById('todayBtn').addEventListener('click',()=>{S.windowStart=addDays(TODAY,-centerOffset(viewLength()));renderTimeline();});
+  document.getElementById('prevBtn').addEventListener('click',()=>{ if(S.zoom==='month'){S.calMonth=addMonths(S.calMonth,-1);} else {S.windowStart=addDays(S.windowStart,-viewLength());} renderTimeline();});
+  document.getElementById('nextBtn').addEventListener('click',()=>{ if(S.zoom==='month'){S.calMonth=addMonths(S.calMonth,1);} else {S.windowStart=addDays(S.windowStart,viewLength());} renderTimeline();});
+  document.getElementById('todayBtn').addEventListener('click',()=>{ if(S.zoom==='month'){S.calMonth=monthStart(TODAY);} else {S.windowStart=addDays(TODAY,-centerOffset(viewLength()));} renderTimeline();});
   document.getElementById('newBtn').addEventListener('click',openNewChooser);
   document.getElementById('adminBtn').addEventListener('click',openAdmin);
   document.getElementById('accountBtn').addEventListener('click',openAccount);
@@ -865,6 +890,9 @@ function computeDayWidth(){
 
 function renderTimeline(){
   if(document.getElementById('app').hidden) return;
+  document.getElementById('tlWrap').hidden = S.zoom==='month';
+  document.getElementById('calWrap').hidden = S.zoom!=='month';
+  if(S.zoom==='month'){ renderCalendar(); return; }
   computeDayWidth();
   const inner=document.getElementById('tlInner');
   const nDays=viewLength();
@@ -996,6 +1024,75 @@ function renderTimeline(){
     });
   });
 
+}
+
+/* ---------------- month calendar view ---------------- */
+function dayItemsFor(dateStr, filterIds){
+  const items=[];
+  S.vacations.forEach(v=>{ if(filterIds.has(v.memberId) && dateStr>=v.start && dateStr<=v.end){ items.push({type:'vac', color:colorFor(v.memberId), label:((memberById(v.memberId)||{}).name||'')+' 휴가'+(v.half==='am'?' · 오전 반차':v.half==='pm'?' · 오후 반차':''), data:v}); } });
+  S.externals.forEach(x=>{ if(x.memberIds.some(id=>filterIds.has(id)) && dateStr>=x.start && dateStr<=x.end){ items.push({type:'ext', color:colorFor(x.memberIds[0]||x.id), label:x.title, data:x}); } });
+  S.tasks.forEach(t=>{
+    if(t.status==='closed' && S.showClosedTickets===false) return;
+    const assignees=[t.uxAssignee,...(t.designAssignees||[])].filter(Boolean);
+    if(assignees.length && !assignees.some(id=>filterIds.has(id))) return;
+    if(dateStr>=t.start && dateStr<=t.end){ items.push({type:'task', color:colorFor(t.uxAssignee||t.id), label:(t.code?t.code+' ':'')+t.title, data:t}); }
+  });
+  return items;
+}
+function renderCalendar(){
+  const inner=document.getElementById('calInner');
+  const filterIds=new Set(visibleMemberIds());
+  const mStart=S.calMonth;
+  const year=mStart.getFullYear(), month=mStart.getMonth();
+  document.getElementById('rangeLabel').textContent=year+'년 '+(month+1)+'월';
+  const firstDow=mStart.getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const gridStart=addDays(mStart,-firstDow);
+  const totalCells=Math.ceil((firstDow+daysInMonth)/7)*7;
+  let html='<div class="calHeadRow">'+DOW.map(d=>'<div class="calHeadCell">'+d+'</div>').join('')+'</div>';
+  html+='<div class="calBody">';
+  for(let i=0;i<totalCells;i++){
+    const d=addDays(gridStart,i);
+    const ds=fmt(d);
+    const inMonth=d.getMonth()===month;
+    const isToday=dayDiff(TODAY,d)===0;
+    const isWknd=(d.getDay()===0||d.getDay()===6);
+    const hol=holidayOn(ds);
+    const items=dayItemsFor(ds,filterIds);
+    const visible=items.slice(0,3);
+    const overflow=items.length-visible.length;
+    html+='<div class="calCell'+(inMonth?'':' outMonth')+(isToday?' today':'')+((isWknd&&S.showWeekend!==false)?' weekend':'')+(hol?' holiday':'')+'" data-date="'+ds+'">'
+      +'<div class="calCellHead"><span class="calDnum'+(isToday?' todayBadge':'')+'">'+d.getDate()+'</span>'+(hol?'<span class="calHname">'+esc(hol.name)+'</span>':'')+'</div>'
+      +'<div class="calItems">'+visible.map(it=>'<div class="calChip" style="background:'+it.color+'22;color:'+it.color+';border-color:'+it.color+'55;" data-cal-item data-type="'+it.type+'" data-id="'+it.data.id+'">'+esc(it.label)+'</div>').join('')
+      +(overflow>0?'<div class="calMore" data-more-date="'+ds+'">+'+overflow+'개</div>':'')
+      +'</div>'
+      +'</div>';
+  }
+  html+='</div>';
+  inner.innerHTML=html;
+  inner.querySelectorAll('[data-cal-item]').forEach(el=>el.addEventListener('click',()=>{
+    const type=el.dataset.type, id=el.dataset.id;
+    if(type==='task') openTaskDetail(id);
+    else if(type==='vac') openVacationForm(S.vacations.find(v=>v.id===id));
+    else if(type==='ext') openExternalForm(S.externals.find(x=>x.id===id));
+  }));
+  inner.querySelectorAll('[data-more-date]').forEach(el=>el.addEventListener('click',()=>openDayDetail(el.dataset.moreDate,filterIds)));
+}
+function openDayDetail(dateStr, filterIds){
+  const items=dayItemsFor(dateStr, filterIds||new Set(visibleMemberIds()));
+  const d=parse(dateStr);
+  openModal('<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button><h3>'+kDateDow(d)+'</h3>'
+    +'<div class="dayDetailList">'+(items.length?items.map(it=>'<div class="dayDetailRow" data-type="'+it.type+'" data-id="'+it.data.id+'"><span class="dot" style="background:'+it.color+'"></span><span>'+esc(it.label)+'</span></div>').join(''):'<div class="tcEmpty">일정이 없습니다.</div>')+'</div>',
+    root=>{
+      window.__closeModal=closeModal;
+      root.querySelectorAll('.dayDetailRow').forEach(el=>el.addEventListener('click',()=>{
+        const type=el.dataset.type, id=el.dataset.id;
+        closeModal();
+        if(type==='task') openTaskDetail(id);
+        else if(type==='vac') openVacationForm(S.vacations.find(v=>v.id===id));
+        else if(type==='ext') openExternalForm(S.externals.find(x=>x.id===id));
+      }));
+    });
 }
 
 /* ---------------- scrum board ---------------- */
