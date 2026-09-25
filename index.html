@@ -319,6 +319,18 @@ table.tasks tr:hover td{background:var(--surface-2);}
 .taskCard .tcSub .tcTodoRow .prio.p1{background:var(--danger-soft);color:var(--p1);}
 .taskCard .tcSub .tcTodoRow .prio.p2{background:var(--warning-soft);color:var(--p2);}
 .taskCard .tcSub .tcTodoRow .prio.p3{background:var(--surface-2);color:var(--p3);}
+.taskCard .tcSub .tcSubTop{position:relative;}
+.taskCard .tcSub .tcEditBtn{flex:none;border:none;background:none;color:var(--text-faint);cursor:pointer;padding:2px 4px;display:inline-flex;align-items:center;}
+.taskCard .tcSub .tcEditBtn:hover{color:var(--accent);}
+.taskCard .tcSub a.outlink{font-size:11px;color:var(--info);text-decoration:none;font-weight:500;flex:none;margin-left:4px;}
+.taskCard .tcSub a.outlink:hover{text-decoration:underline;}
+.taskCard .tcSub .tcMeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 8px;font-size:11px;color:var(--text-muted);}
+.taskCard .tcSub .tcMeta .cat{font-size:10px;color:var(--text-muted);border:1px solid var(--border);border-radius:5px;padding:0 6px;}
+.taskCard .tcSub .tcMeta .extNo{font-size:10px;color:var(--text-faint);font-family:var(--font-mono);}
+.taskCard .tcSub .prio{font-size:9.5px;font-weight:600;border-radius:4px;padding:0 4px;flex:none;}
+.taskCard .tcSub .prio.p1{background:var(--danger-soft);color:var(--p1);}
+.taskCard .tcSub .prio.p2{background:var(--warning-soft);color:var(--p2);}
+.taskCard .tcSub .prio.p3{background:var(--surface-2);color:var(--p3);}
 .viewToggleRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px;border-bottom:1px solid var(--border);}
 .viewToggleRow:last-child{border-bottom:none;}
 .viewToggleRow .vtInfo{flex:1;min-width:0;}
@@ -1037,7 +1049,15 @@ function taskTasksOf(t){
   return (t.subtasks||[]).map(s=>({
     id: s.id || genId('tk'),
     title: s.title||'',
-    todos: (s.todos && s.todos.length) ? s.todos.map(td=>({id:td.id||genId('td'), title:td.title||'', progress:td.progress||0, priority:td.priority||''})) : [{id:genId('td'), title:s.title||'', progress:s.progress||0, priority:''}]
+    category: s.category||'',
+    uxAssignee: s.uxAssignee||'',
+    designAssignee: s.designAssignee||'',
+    extTicketNo: s.extTicketNo||'',
+    links: s.links||[],
+    start: s.start||'',
+    end: s.end||'',
+    priority: s.priority||'',
+    todos: (s.todos && s.todos.length) ? s.todos.map(td=>({id:td.id||genId('td'), title:td.title||'', progress:td.progress||0, priority:td.priority||''})) : [{id:genId('td'), title:s.title||'', progress:(s.manualProgress!=null?s.manualProgress:(s.progress||0)), priority:''}]
   }));
 }
 function taskItemProgress(tk){
@@ -1103,7 +1123,17 @@ function renderTasks(){
           const tdPrio=td.priority?'<span class="prio '+td.priority+'">'+({p1:'P1',p2:'P2',p3:'P3'}[td.priority]||'')+'</span>':'';
           return '<div class="tcTodoRow"><span class="tcTodoArrow">└</span><span class="tcTodoTitle">'+esc(td.title)+'</span>'+tdPrio+'<span class="tcTodoProg">'+(td.progress||0)+'%</span></div>';
         }).join('')+'</div>'):'';
-        return '<div class="tcSub"><div class="tcSubTop"><span class="tcSubCheck'+(checked?' checked':'')+'">'+(checked?icon('check',10):'')+'</span><span class="tcSubIdx">'+String(i+1).padStart(2,'0')+'</span><span class="tcSubTitle">'+esc(tk.title||'')+'</span></div><div class="progBar"><i style="width:'+tProg+'%"></i></div><span class="progNum">'+tProg+'%</span>'+todosHtml+'</div>';
+        const tkPrio=tk.priority?'<span class="prio '+tk.priority+'">'+({p1:'P1',p2:'P2',p3:'P3'}[tk.priority]||'')+'</span>':'';
+        const uxN=tk.uxAssignee?((memberById(tk.uxAssignee)||{}).name||''):'';
+        const dzN=tk.designAssignee?((memberById(tk.designAssignee)||{}).name||''):'';
+        const assigneeTxt=(uxN||dzN)?('UX '+(uxN||'미정')+'  Design '+(dzN||'미정')):'';
+        const tkLinks=(tk.links||[]).filter(Boolean);
+        const linkHtml=tkLinks.length?'<a class="outlink" href="'+esc(tkLinks[0])+'" target="_blank" rel="noopener">산출물'+(tkLinks.length>1?' '+tkLinks.length:'')+'</a>':'';
+        const metaChips=(tk.category?'<span class="cat">'+esc(tk.category)+'</span>':'')+(tk.extTicketNo?'<span class="extNo">'+esc(tk.extTicketNo)+'</span>':'');
+        const metaRow=(metaChips||assigneeTxt)?('<div class="tcMeta">'+metaChips+(assigneeTxt?'<span>'+esc(assigneeTxt)+'</span>':'')+'</div>'):'';
+        return '<div class="tcSub"><div class="tcSubTop"><span class="tcSubCheck'+(checked?' checked':'')+'">'+(checked?icon('check',10):'')+'</span><span class="tcSubIdx">'+String(i+1).padStart(2,'0')+'</span>'+tkPrio+'<span class="tcSubTitle">'+esc(tk.title||'')+'</span><button type="button" class="tcEditBtn" data-tkedit="'+t.id+'|'+i+'" title="Task 수정">'+icon('pencil',12)+'</button>'+linkHtml+'</div>'
+          +metaRow
+          +'<div class="progBar"><i style="width:'+tProg+'%"></i></div><span class="progNum">'+tProg+'%</span>'+todosHtml+'</div>';
       }).join('')+'</div>'
     ) : '<div class="tcEmpty">하위 Task가 없습니다.</div>';
     return '<div class="taskCard'+(closed?' isClosed':'')+'">'
@@ -1139,6 +1169,11 @@ function renderTasks(){
       +'</div>';
   }).join('') : '<div class="scrumEmpty">과제가 없습니다.</div>';
 
+  document.querySelectorAll('#taskCardView [data-tkedit]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    const parts=b.dataset.tkedit.split('|');
+    openSubtaskForm(parts[0], Number(parts[1]));
+  }));
   document.querySelectorAll('#taskCardView [data-edit], #taskListRows [data-edit]').forEach(b=>b.addEventListener('click',()=>openTaskForm(taskById(b.dataset.edit))));
   document.querySelectorAll('#taskCardView [data-del], #taskListRows [data-del]').forEach(b=>b.addEventListener('click',()=>{
     if(confirm('이 과제를 삭제할까요?')) store.tasks.remove(b.dataset.del).then(()=>toast('과제를 삭제했습니다.'));
@@ -1164,11 +1199,12 @@ function openNewChooser(){
     +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="task">'+icon('clipboardList',16)+'새 과제</button>'
     +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="vac">'+icon('palmtree',16)+'새 휴가</button>'
     +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="ext">'+icon('briefcase',16)+'새 외근</button>'
+    +'<button class="iconBtn" style="justify-content:flex-start;padding:12px;" data-c="subtask">'+icon('clipboardList',16)+'새 Task</button>'
     +'</div>', root=>{
       window.__closeModal=closeModal;
       root.querySelectorAll('[data-c]').forEach(b=>b.addEventListener('click',()=>{
         const c=b.dataset.c;
-        if(c==='task')openTaskForm(null); else if(c==='vac')openVacationForm(null); else openExternalForm(null);
+        if(c==='task')openTaskForm(null); else if(c==='vac')openVacationForm(null); else if(c==='ext')openExternalForm(null); else openSubtaskForm(null,null);
       }));
     });
 }
@@ -1209,6 +1245,70 @@ function openTaskForm(task){
 }
 function field(label,name,val,type,ph){
   return '<div class="field2"><label>'+label+'</label><input name="'+name+'" type="'+(type||'text')+'" value="'+esc(val==null?'':val)+'" '+(ph?'placeholder="'+ph+'"':'')+'></div>';
+}
+
+/* -------- subtask (Task) form -------- */
+function openSubtaskForm(ticketId, idx){
+  const isEdit = idx!=null;
+  const ticket0 = ticketId?taskById(ticketId):null;
+  const sub = (isEdit && ticket0) ? (ticket0.subtasks||[])[idx] : null;
+  const s = sub || {id:null,title:'',category:'',uxAssignee:'',designAssignee:'',extTicketNo:'',links:[],start:'',end:'',priority:'',manualProgress:null,todos:[]};
+  const ticketOpts = S.tasks.slice().sort((a,b)=>(a.code||'').localeCompare(b.code||'')).map(t=>'<option value="'+t.id+'" '+(ticketId===t.id?'selected':'')+'>'+esc(t.code)+' · '+esc(t.title)+'</option>').join('');
+  const memberOpts = (sel)=>S.members.map(m=>'<option value="'+m.id+'" '+(sel===m.id?'selected':'')+'>'+esc(m.name)+'</option>').join('');
+  openModal(
+    '<button class="modalClose" onclick="window.__closeModal()">'+icon('x')+'</button>'
+    +'<h3>'+(isEdit?'Task 수정':'새 Task')+'</h3><p class="desc">티켓에 속한 구체적인 할 일입니다.</p>'
+    +'<form id="subtaskForm"><div class="formGrid">'
+    +'<div class="field2 full"><label>관련 티켓</label><select name="ticketId" '+(isEdit?'disabled':'required')+'><option value="">티켓을 선택하세요</option>'+ticketOpts+'</select></div>'
+    +field('Task 분류','category',s.category,'text','예: 설계, 디자인')
+    +'<div class="field2 full"><label>Task명</label><input name="title" value="'+esc(s.title)+'" required></div>'
+    +'<div class="field2"><label>UX 담당자</label><select name="uxAssignee"><option value="">미정</option>'+memberOpts(s.uxAssignee)+'</select></div>'
+    +'<div class="field2"><label>Design 담당자</label><select name="designAssignee"><option value="">미정</option>'+memberOpts(s.designAssignee)+'</select></div>'
+    +field('외부 티켓번호','extTicketNo',s.extTicketNo,'text','예: #12345')
+    +field('시작일','start',s.start,'date')
+    +field('마감일','end',s.end,'date')
+    +'<div class="field2"><label>우선순위</label><select name="priority"><option value="">우선순위 없음</option><option value="p1" '+(s.priority==='p1'?'selected':'')+'>P1</option><option value="p2" '+(s.priority==='p2'?'selected':'')+'>P2</option><option value="p3" '+(s.priority==='p3'?'selected':'')+'>P3</option></select></div>'
+    +field('Task 자체 진행률(%)','manualProgress',s.manualProgress==null?'':s.manualProgress,'number','하위 To-do가 없을 때 사용')
+    +'<div class="field2 full"><label>산출물 링크 (줄바꿈으로 구분, 최대 10개)</label><textarea name="links" rows="3" placeholder="https://..." style="width:100%;box-sizing:border-box;font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);resize:vertical;">'+esc((s.links||[]).join('\n'))+'</textarea></div>'
+    +'</div>'
+    +'<div class="modalActions">'+(isEdit?'<button type="button" class="btnDanger" id="subtaskDel">삭제</button>':'')+'<button type="button" class="btnGhost" onclick="window.__closeModal()">취소</button><button class="btnPrimary" style="width:auto;">저장</button></div>'
+    +'</form>', root=>{
+      window.__closeModal=closeModal;
+      root.querySelector('#subtaskDel')&&root.querySelector('#subtaskDel').addEventListener('click',()=>{
+        if(!confirm('이 Task를 삭제할까요? (하위 To-do도 함께 삭제됩니다)')) return;
+        const list=(ticket0.subtasks||[]).slice(); list.splice(idx,1);
+        store.tasks.update(ticket0.id,{subtasks:list}).then(()=>{toast('삭제했습니다.');closeModal();});
+      });
+      root.querySelector('#subtaskForm').addEventListener('submit', async e=>{
+        e.preventDefault();
+        const f=new FormData(e.target);
+        const targetTicketId = isEdit ? ticket0.id : f.get('ticketId');
+        if(!targetTicketId){ toast('관련 티켓을 선택해주세요.'); return; }
+        const target = taskById(targetTicketId);
+        if(!target){ toast('티켓을 찾을 수 없습니다.'); return; }
+        const linksRaw=(f.get('links')||'').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,10);
+        const mp=f.get('manualProgress');
+        const data={
+          id: s.id || genId('tk'),
+          title: f.get('title')||'',
+          category: f.get('category')||'',
+          uxAssignee: f.get('uxAssignee')||'',
+          designAssignee: f.get('designAssignee')||'',
+          extTicketNo: f.get('extTicketNo')||'',
+          links: linksRaw,
+          start: f.get('start')||'',
+          end: f.get('end')||'',
+          priority: f.get('priority')||'',
+          manualProgress: (mp===''||mp==null) ? null : clamp(Number(mp)||0,0,100),
+          todos: s.todos||[]
+        };
+        const list=(target.subtasks||[]).slice();
+        if(isEdit){ list[idx]=data; }
+        else { list.push(data); }
+        await store.tasks.update(target.id,{subtasks:list});
+        toast('저장했습니다.'); closeModal();
+      });
+    });
 }
 
 /* -------- vacation form -------- */
